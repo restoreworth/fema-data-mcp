@@ -1,0 +1,1273 @@
+{
+ "id": "34025",
+ "kind": "county",
+ "name": "Monmouth County",
+ "state": "NJ",
+ "slug": "monmouth-county-nj",
+ "generated_at": "2026-10-12T13:15:44Z",
+ "sources": [
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-11",
+   "filter": "policyEffectiveDate ge '2025-01-01' and lt '2026-01-01', per propertyState (rows downloaded, every occupancy; residential and policyCost > 0 kept locally)"
+  },
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "$inlinecount per year 2019-2025: propertyState eq '<ST>' and occupancyType in (1,2,3,11,12,13,14) [and startswith(censusGeoid,'<county FIPS>')]"
+  },
+  {
+   "dataset": "NfipClaims",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipClaims",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "yearOfLoss eq <year> and amountPaidOnBuildingClaim gt 0 (one request per year)"
+  },
+  {
+   "dataset": "CPI-U, U.S. city average, all items (CUUR0000SA0), annual average",
+   "version": "BLS Public Data API v1",
+   "api": "https://api.bls.gov/publicAPI/v1/timeseries/data/",
+   "as_of": "annual averages 2005-2025",
+   "accessed_at": "2026-10-12",
+   "filter": "period M13"
+  },
+  {
+   "dataset": "DisasterDeclarationsSummaries",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/DisasterDeclarationsSummaries",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows); declarationType DR or EM, incidentType Flood, Hurricane, Severe Storm, Severe Storm(s), declarationDate >= 2000 kept locally"
+  },
+  {
+   "dataset": "HousingAssistanceOwners",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/HousingAssistanceOwners",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows)"
+  },
+  {
+   "dataset": "NfipCommunityStatusBook",
+   "version": "v1",
+   "api": "https://www.fema.gov/api/open/v1/NfipCommunityStatusBook",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "all rows; community -> county on the `county` text field"
+  }
+ ],
+ "notes": [
+  "FEMA field definition (NfipPolicies v3, policyCost): \"Calculated in dollars by adding together calculated premium, reserve fund assessment, federal policy fee, and HFIAA surcharge\"",
+  "FEMA field definition (NfipPolicies v3, totalInsurancePremiumOfThePolicy): \"Total Insurance Premium of the Policy in whole dollars. Negative values indicate a refund.\"; policyCost is used because it is what the policyholder pays; policyCost < totalInsurancePremiumOfThePolicy on 0 of 3117116 kept residential policies.",
+  "Premiums: one row = one policy term effective in 2025 (NFIP only, no private insurance); median and quartiles are Hyndman-Fan type 7, rounded half up to the dollar; a cell (State, zone, zone group, county) is published only when n >= 100.",
+  "Flood zones: ratedFloodZone grouped as A1-A30 -> AE, V1-V30 -> VE, B/C/X -> X, AOB -> AO, AHB -> AH, AR* -> AR; zone D and unknown zones are left out of the zone tables.",
+  "policies_trend: residential policy terms per year counted by the API ($inlinecount), all premiums included (policyCost <= 0 too), so the 2025 count can differ from premiums.n (county: the API count also filters propertyState, premiums.n does not).",
+  "Claims: amounts paid by NFIP on building claims (amountPaidOnBuildingClaim > 0), not repair costs; nominal dollars; median_paid_2024usd deflates each claim by its yearOfLoss with CPI-U annual averages (same series and method as nfip-paid-claims-by-state); NfipClaims asOfDate 2026-09-08.",
+  "Declarations: administrative decisions, not measured damage; scope = Flood, Hurricane, Severe Storm, Severe Storm(s), major disaster (DR) and emergency (EM), declared since 2000, counted once per disaster number.",
+  "Owners assistance: FEMA inspections of owner applicants to the Individuals and Households Program (inspected damage bands, not insurance claims or grants); NFIP and IHP figures measure different populations and are never added.",
+  "This product uses the Federal Emergency Management Agency’s OpenFEMA API, but is not endorsed by FEMA. The Federal Government or FEMA cannot vouch for the data or analyses derived from these data after the data have been retrieved from the Agency's website(s).",
+  "County of a policy = first 5 digits of censusGeoid (block group of the address); county of a claim = countyCode. FEMA: \"the County Code field may not reflect the individual county the property is located\".",
+  "Dominant event: Hurricane Ida = 0.055 of paid claims 2015-2024.",
+  "Owners assistance: HousingAssistanceOwners has no FIPS field; rows joined on the county text (DDS designatedArea, then Census 2020 name). HA: \"the applicant has the right to choose the county\"."
+ ],
+ "premiums": {
+  "window": "policies effective 2025",
+  "occupancy": "residential (occupancyType 1,2,3,11,12,13,14)",
+  "field": "policyCost",
+  "n": 14168,
+  "median": 1181,
+  "q1": 881,
+  "q3": 1601,
+  "by_zone_group": [
+   {
+    "group": "SFHA (A, AE, AH, AO, AR, A99, V, VE)",
+    "n": 10119,
+    "median": 1336,
+    "q1": 944,
+    "q3": 1746
+   },
+   {
+    "group": "Outside SFHA (X, B, C)",
+    "n": 4046,
+    "median": 1018,
+    "q1": 773,
+    "q3": 1198
+   }
+  ],
+  "by_zone": [
+   {
+    "zone": "AE",
+    "n": 9810,
+    "median": 1347,
+    "q1": 951,
+    "q3": 1757
+   },
+   {
+    "zone": "X",
+    "n": 4046,
+    "median": 1018,
+    "q1": 773,
+    "q3": 1198
+   },
+   {
+    "zone": "VE",
+    "n": 155,
+    "median": 1039,
+    "q1": 868,
+    "q3": 1427
+   },
+   {
+    "zone": "A",
+    "n": 149,
+    "median": 994,
+    "q1": 782,
+    "q3": 1440
+   }
+  ],
+  "policies_trend": [
+   {
+    "year": 2019,
+    "n": 17039
+   },
+   {
+    "year": 2020,
+    "n": 16806
+   },
+   {
+    "year": 2021,
+    "n": 16626
+   },
+   {
+    "year": 2022,
+    "n": 15229
+   },
+   {
+    "year": 2023,
+    "n": 14687
+   },
+   {
+    "year": 2024,
+    "n": 14552
+   },
+   {
+    "year": 2025,
+    "n": 14168
+   }
+  ]
+ },
+ "claims": {
+  "window": "year of loss 2015-2024",
+  "n_paid": 330,
+  "median_paid": 7989,
+  "q1": 3590,
+  "q3": 17797,
+  "dollars": "nominal",
+  "median_paid_2024usd": 8481,
+  "top_events": [
+   {
+    "name": "Hurricane Ida",
+    "n": 18,
+    "share": 0.055
+   },
+   {
+    "name": "Hurricane Elsa",
+    "n": 4,
+    "share": 0.012
+   },
+   {
+    "name": "Winter Storm Jonas",
+    "n": 4,
+    "share": 0.012
+   },
+   {
+    "name": "Tropical Storm Henri",
+    "n": 3,
+    "share": 0.009
+   },
+   {
+    "name": "December Nor'easter",
+    "n": 2,
+    "share": 0.006
+   }
+  ],
+  "dominant_event_share": 0.055,
+  "by_year": [
+   {
+    "year": 2015,
+    "n": 3
+   },
+   {
+    "year": 2016,
+    "n": 10
+   },
+   {
+    "year": 2017,
+    "n": 11
+   },
+   {
+    "year": 2018,
+    "n": 77
+   },
+   {
+    "year": 2019,
+    "n": 9
+   },
+   {
+    "year": 2020,
+    "n": 4
+   },
+   {
+    "year": 2021,
+    "n": 39
+   },
+   {
+    "year": 2022,
+    "n": 21
+   },
+   {
+    "year": 2023,
+    "n": 135
+   },
+   {
+    "year": 2024,
+    "n": 21
+   }
+  ]
+ },
+ "declarations": {
+  "since": 2000,
+  "n_total": 10,
+  "by_incident_type": {
+   "Flood": 0,
+   "Hurricane": 8,
+   "Severe Storm": 2
+  },
+  "major_only": 6,
+  "latest": [
+   {
+    "id": "DR-4614",
+    "title": "REMNANTS OF HURRICANE IDA",
+    "incident_type": "Hurricane",
+    "date": "2021-09-05"
+   },
+   {
+    "id": "EM-3573",
+    "title": "REMNANTS OF HURRICANE IDA",
+    "incident_type": "Hurricane",
+    "date": "2021-09-02"
+   },
+   {
+    "id": "DR-4574",
+    "title": "TROPICAL STORM ISAIAS",
+    "incident_type": "Hurricane",
+    "date": "2020-12-11"
+   },
+   {
+    "id": "DR-4264",
+    "title": "SEVERE WINTER STORM AND SNOWSTORM",
+    "incident_type": "Severe Storm",
+    "date": "2016-03-14"
+   },
+   {
+    "id": "DR-4086",
+    "title": "HURRICANE SANDY",
+    "incident_type": "Hurricane",
+    "date": "2012-10-30"
+   }
+  ]
+ },
+ "owners_assistance": {
+  "since": 2002,
+  "n_inspected": 17881,
+  "damage_bands": [
+   {
+    "band": "No FEMA-inspected damage",
+    "n": 1627
+   },
+   {
+    "band": "$1-$10,000",
+    "n": 10656
+   },
+   {
+    "band": "$10,001-$20,000",
+    "n": 2183
+   },
+   {
+    "band": "$20,001-$30,000",
+    "n": 1587
+   },
+   {
+    "band": "More than $30,000",
+    "n": 1828
+   }
+  ],
+  "top_disasters": [
+   {
+    "id": "DR-4086",
+    "n": 11901,
+    "title": "HURRICANE SANDY",
+    "date": "2012-10-30"
+   },
+   {
+    "id": "DR-4021",
+    "n": 4789,
+    "title": "HURRICANE IRENE",
+    "date": "2011-08-31"
+   },
+   {
+    "id": "DR-1897",
+    "n": 1191,
+    "title": "SEVERE STORMS AND FLOODING",
+    "date": "2010-04-02"
+   }
+  ]
+ },
+ "compare": {
+  "peers": {
+   "family": "counties",
+   "n": 339
+  },
+  "values": {
+   "policies": 14168,
+   "median_premium": 1181,
+   "paid_claims": 330,
+   "median_paid": 7989,
+   "declarations": 10,
+   "owners_over_30k_share": 0.102
+  },
+  "rank_in_family": {
+   "policies": {
+    "rank": 41,
+    "of": 339
+   },
+   "median_premium": {
+    "rank": 96,
+    "of": 339
+   },
+   "paid_claims": {
+    "rank": 159,
+    "of": 339
+   },
+   "median_paid": {
+    "rank": 315,
+    "of": 339
+   },
+   "declarations": {
+    "rank": 250,
+    "of": 339
+   },
+   "owners_over_30k_share": {
+    "rank": 25,
+    "of": 339
+   }
+  },
+  "national": {
+   "median_premium": 1055,
+   "median_paid": 37248,
+   "owners_over_30k_share": 0.026
+  },
+  "gaps": {
+   "median_premium": {
+    "national": {
+     "ref": 1055,
+     "diff": 126,
+     "rel": 0.119
+    },
+    "state": {
+     "ref": 1260,
+     "diff": -79,
+     "rel": -0.063
+    }
+   },
+   "median_paid": {
+    "national": {
+     "ref": 37248,
+     "diff": -29259,
+     "rel": -0.786
+    },
+    "state": {
+     "ref": 16375,
+     "diff": -8386,
+     "rel": -0.512
+    }
+   },
+   "owners_over_30k_share": {
+    "national": {
+     "ref": 0.026,
+     "diff": 0.076,
+     "rel": 2.923
+    },
+    "state": {
+     "ref": 0.043,
+     "diff": 0.059,
+     "rel": 1.372
+    }
+   },
+   "declarations": {
+    "state_counties": {
+     "ref": 13,
+     "diff": -3,
+     "rel": -0.231
+    }
+   }
+  },
+  "rank_in_state": {
+   "policies": {
+    "rank": 3,
+    "of": 15
+   },
+   "median_premium": {
+    "rank": 14,
+    "of": 15
+   },
+   "paid_claims": {
+    "rank": 11,
+    "of": 15
+   },
+   "median_paid": {
+    "rank": 14,
+    "of": 15
+   },
+   "declarations": {
+    "rank": 13,
+    "of": 15
+   },
+   "owners_over_30k_share": {
+    "rank": 2,
+    "of": 15
+   }
+  },
+  "state": {
+   "median_premium": 1260,
+   "median_paid": 16375,
+   "owners_over_30k_share": 0.043,
+   "counties": 15,
+   "declarations_county_median": 13
+  }
+ },
+ "community_status": {
+  "n": 53,
+  "participating": 53,
+  "crs_classed": 16,
+  "share_classed": 0.302,
+  "best_class": 5,
+  "best_class_communities": [
+   "BELMAR, BOROUGH OF",
+   "MANASQUAN, BOROUGH OF"
+  ],
+  "oldest_current_map": {
+   "date": "2009-09-25",
+   "community": "MANASQUAN, BOROUGH OF"
+  },
+  "sanctioned": 0,
+  "suspended": 0,
+  "withdrawn": 0,
+  "not_participating": 0,
+  "communities": [
+   {
+    "id": "345283",
+    "name": "BELMAR, BOROUGH OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 5,
+    "sfha_discount_pct": 25,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2022-06-15",
+    "current_map_code": null,
+    "first_firm": "1972-05-13",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "345303",
+    "name": "MANASQUAN, BOROUGH OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 5,
+    "sfha_discount_pct": 25,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1972-05-12",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340317",
+    "name": "NEPTUNE, TOWNSHIP OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 6,
+    "sfha_discount_pct": 20,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2022-06-15",
+    "current_map_code": null,
+    "first_firm": "1977-02-16",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "345317",
+    "name": "SEA BRIGHT, BOROUGH OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 6,
+    "sfha_discount_pct": 20,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2022-06-15",
+    "current_map_code": null,
+    "first_firm": "1971-10-14",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340287",
+    "name": "AVON-BY-THE-SEA, BOROUGH OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 7,
+    "sfha_discount_pct": 15,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2022-06-15",
+    "current_map_code": null,
+    "first_firm": "1979-03-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340289",
+    "name": "BRADLEY BEACH, BOROUGH OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 7,
+    "sfha_discount_pct": 15,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2022-06-15",
+    "current_map_code": null,
+    "first_firm": "1979-08-01",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340298",
+    "name": "HAZLET, TOWNSHIP OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 7,
+    "sfha_discount_pct": 15,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1982-12-01",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340303",
+    "name": "KEANSBURG, BOROUGH OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 7,
+    "sfha_discount_pct": 15,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1983-05-16",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340307",
+    "name": "LONG BRANCH, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 7,
+    "sfha_discount_pct": 15,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2022-06-15",
+    "current_map_code": null,
+    "first_firm": "1976-05-05",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340313",
+    "name": "MIDDLETOWN, TOWNSHIP OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 7,
+    "sfha_discount_pct": 15,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2022-06-15",
+    "current_map_code": null,
+    "first_firm": "1984-02-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340320",
+    "name": "OCEANPORT, BOROUGH OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 7,
+    "sfha_discount_pct": 15,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2022-06-15",
+    "current_map_code": null,
+    "first_firm": "1977-02-16",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340329",
+    "name": "SPRING LAKE, BOROUGH OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 7,
+    "sfha_discount_pct": 15,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2022-06-15",
+    "current_map_code": null,
+    "first_firm": "1982-02-17",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340331",
+    "name": "UNION BEACH, BOROUGH OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 7,
+    "sfha_discount_pct": 15,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1980-05-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340312",
+    "name": "ABERDEEN, TOWNSHIP OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 8,
+    "sfha_discount_pct": 10,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2018-06-20",
+    "current_map_code": null,
+    "first_firm": "1985-03-18",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340315",
+    "name": "MONMOUTH BEACH, BOROUGH OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 8,
+    "sfha_discount_pct": 10,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2022-06-15",
+    "current_map_code": null,
+    "first_firm": "1977-05-16",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340319",
+    "name": "OCEAN, TOWNSHIP OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 8,
+    "sfha_discount_pct": 10,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2022-06-15",
+    "current_map_code": null,
+    "first_firm": "1977-10-14",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340283",
+    "name": "ALLENHURST, BOROUGH OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2022-06-15",
+    "current_map_code": null,
+    "first_firm": "1979-03-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340284",
+    "name": "ALLENTOWN, BOROUGH OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1981-09-16",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340285",
+    "name": "ASBURY PARK, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2022-06-15",
+    "current_map_code": null,
+    "first_firm": "1979-02-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340286",
+    "name": "ATLANTIC HIGHLANDS, BOROUGH OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2022-06-15",
+    "current_map_code": null,
+    "first_firm": "1981-08-03",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340290",
+    "name": "BRIELLE, BOROUGH OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1979-04-02",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340291",
+    "name": "COLTS NECK, TOWNSHIP OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1982-04-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340292",
+    "name": "DEAL, BOROUGH OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2022-06-15",
+    "current_map_code": null,
+    "first_firm": "1976-03-05",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340293",
+    "name": "EATONTOWN, BOROUGH OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2018-06-20",
+    "current_map_code": null,
+    "first_firm": "1981-09-16",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340294",
+    "name": "ENGLISHTOWN, BOROUGH OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1981-03-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340295",
+    "name": "FAIR HAVEN, BOROUGH OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2022-06-15",
+    "current_map_code": null,
+    "first_firm": "1979-10-16",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340296",
+    "name": "FARMINGDALE, BOROUGH OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": "M",
+    "first_firm": "1982-11-26",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "345536",
+    "name": "FREEHOLD, BOROUGH OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": null,
+    "current_map_code": null,
+    "first_firm": null,
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340297",
+    "name": "FREEHOLD, TOWNSHIP OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1976-07-16",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "345297",
+    "name": "HIGHLANDS, BOROUGH OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2022-06-15",
+    "current_map_code": null,
+    "first_firm": "1971-09-03",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340300",
+    "name": "HOLMDEL, TOWNSHIP OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1982-03-01",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340301",
+    "name": "HOWELL, TOWNSHIP OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1983-01-06",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340302",
+    "name": "INTERLAKEN, BOROUGH OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2022-06-15",
+    "current_map_code": null,
+    "first_firm": "1981-01-02",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340304",
+    "name": "KEYPORT, BOROUGH OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1979-07-02",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340328",
+    "name": "LAKE COMO, BOROUGH OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2022-06-15",
+    "current_map_code": null,
+    "first_firm": "1980-11-28",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340305",
+    "name": "LITTLE SILVER, BOROUGH OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2022-06-15",
+    "current_map_code": null,
+    "first_firm": "1978-02-01",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340306",
+    "name": "LOCH ARBOUR, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2022-06-15",
+    "current_map_code": null,
+    "first_firm": "1979-03-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340308",
+    "name": "MANALAPAN, TOWNSHIP OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1977-09-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340310",
+    "name": "MARLBORO, TOWNSHIP OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1978-06-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340311",
+    "name": "MATAWAN, BOROUGH OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2018-06-20",
+    "current_map_code": null,
+    "first_firm": "1981-09-30",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340314",
+    "name": "MILLSTONE, TOWNSHIP OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1982-01-20",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340316",
+    "name": "NEPTUNE CITY, BOROUGH OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2022-06-15",
+    "current_map_code": null,
+    "first_firm": "1978-08-11",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340321",
+    "name": "RED BANK, BOROUGH OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2022-06-15",
+    "current_map_code": null,
+    "first_firm": "1981-05-19",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340322",
+    "name": "ROOSEVELT, BOROUGH OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": "M",
+    "first_firm": "2009-09-25",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "345316",
+    "name": "RUMSON, BOROUGH OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2022-06-15",
+    "current_map_code": null,
+    "first_firm": "1973-12-28",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340325",
+    "name": "SEA GIRT, BOROUGH OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1976-03-05",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340326",
+    "name": "SHREWSBURY, BOROUGH OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2018-06-20",
+    "current_map_code": null,
+    "first_firm": "1979-08-01",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340002",
+    "name": "SHREWSBURY, TOWNSHIP OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": null,
+    "current_map_code": "NSFHA",
+    "first_firm": "2009-09-25",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340330",
+    "name": "SPRING LAKE HEIGHTS, BOROUGH OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2022-06-15",
+    "current_map_code": null,
+    "first_firm": "1981-12-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340318",
+    "name": "TINTON FALLS, BOROUGH OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2022-06-15",
+    "current_map_code": null,
+    "first_firm": "1976-12-31",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340332",
+    "name": "UPPER FREEHOLD, TOWNSHIP OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1979-10-12",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340333",
+    "name": "WALL, TOWNSHIP OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2022-06-15",
+    "current_map_code": null,
+    "first_firm": "1977-02-16",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "340334",
+    "name": "WEST LONG BRANCH, BOROUGH OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1981-01-16",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   }
+  ],
+  "multi_county_communities": [],
+  "state_join_share": 0.0
+ }
+}

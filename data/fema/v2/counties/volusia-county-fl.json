@@ -1,0 +1,774 @@
+{
+ "id": "12127",
+ "kind": "county",
+ "name": "Volusia County",
+ "state": "FL",
+ "slug": "volusia-county-fl",
+ "generated_at": "2026-10-12T13:15:44Z",
+ "sources": [
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-11",
+   "filter": "policyEffectiveDate ge '2025-01-01' and lt '2026-01-01', per propertyState (rows downloaded, every occupancy; residential and policyCost > 0 kept locally)"
+  },
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "$inlinecount per year 2019-2025: propertyState eq '<ST>' and occupancyType in (1,2,3,11,12,13,14) [and startswith(censusGeoid,'<county FIPS>')]"
+  },
+  {
+   "dataset": "NfipClaims",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipClaims",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "yearOfLoss eq <year> and amountPaidOnBuildingClaim gt 0 (one request per year)"
+  },
+  {
+   "dataset": "CPI-U, U.S. city average, all items (CUUR0000SA0), annual average",
+   "version": "BLS Public Data API v1",
+   "api": "https://api.bls.gov/publicAPI/v1/timeseries/data/",
+   "as_of": "annual averages 2005-2025",
+   "accessed_at": "2026-10-12",
+   "filter": "period M13"
+  },
+  {
+   "dataset": "DisasterDeclarationsSummaries",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/DisasterDeclarationsSummaries",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows); declarationType DR or EM, incidentType Flood, Hurricane, Severe Storm, Severe Storm(s), declarationDate >= 2000 kept locally"
+  },
+  {
+   "dataset": "HousingAssistanceOwners",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/HousingAssistanceOwners",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows)"
+  },
+  {
+   "dataset": "NfipCommunityStatusBook",
+   "version": "v1",
+   "api": "https://www.fema.gov/api/open/v1/NfipCommunityStatusBook",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "all rows; community -> county on the `county` text field"
+  }
+ ],
+ "notes": [
+  "FEMA field definition (NfipPolicies v3, policyCost): \"Calculated in dollars by adding together calculated premium, reserve fund assessment, federal policy fee, and HFIAA surcharge\"",
+  "FEMA field definition (NfipPolicies v3, totalInsurancePremiumOfThePolicy): \"Total Insurance Premium of the Policy in whole dollars. Negative values indicate a refund.\"; policyCost is used because it is what the policyholder pays; policyCost < totalInsurancePremiumOfThePolicy on 0 of 3117116 kept residential policies.",
+  "Premiums: one row = one policy term effective in 2025 (NFIP only, no private insurance); median and quartiles are Hyndman-Fan type 7, rounded half up to the dollar; a cell (State, zone, zone group, county) is published only when n >= 100.",
+  "Flood zones: ratedFloodZone grouped as A1-A30 -> AE, V1-V30 -> VE, B/C/X -> X, AOB -> AO, AHB -> AH, AR* -> AR; zone D and unknown zones are left out of the zone tables.",
+  "policies_trend: residential policy terms per year counted by the API ($inlinecount), all premiums included (policyCost <= 0 too), so the 2025 count can differ from premiums.n (county: the API count also filters propertyState, premiums.n does not).",
+  "Claims: amounts paid by NFIP on building claims (amountPaidOnBuildingClaim > 0), not repair costs; nominal dollars; median_paid_2024usd deflates each claim by its yearOfLoss with CPI-U annual averages (same series and method as nfip-paid-claims-by-state); NfipClaims asOfDate 2026-09-08.",
+  "Declarations: administrative decisions, not measured damage; scope = Flood, Hurricane, Severe Storm, Severe Storm(s), major disaster (DR) and emergency (EM), declared since 2000, counted once per disaster number.",
+  "Owners assistance: FEMA inspections of owner applicants to the Individuals and Households Program (inspected damage bands, not insurance claims or grants); NFIP and IHP figures measure different populations and are never added.",
+  "This product uses the Federal Emergency Management Agency’s OpenFEMA API, but is not endorsed by FEMA. The Federal Government or FEMA cannot vouch for the data or analyses derived from these data after the data have been retrieved from the Agency's website(s).",
+  "County of a policy = first 5 digits of censusGeoid (block group of the address); county of a claim = countyCode. FEMA: \"the County Code field may not reflect the individual county the property is located\".",
+  "Dominant event: Hurricane Ian = 0.425 of paid claims 2015-2024.",
+  "Owners assistance: HousingAssistanceOwners has no FIPS field; rows joined on the county text (DDS designatedArea, then Census 2020 name). HA: \"the applicant has the right to choose the county\"."
+ ],
+ "premiums": {
+  "window": "policies effective 2025",
+  "occupancy": "residential (occupancyType 1,2,3,11,12,13,14)",
+  "field": "policyCost",
+  "n": 24220,
+  "median": 890,
+  "q1": 663,
+  "q3": 1084,
+  "by_zone_group": [
+   {
+    "group": "SFHA (A, AE, AH, AO, AR, A99, V, VE)",
+    "n": 10395,
+    "median": 941,
+    "q1": 714,
+    "q3": 1215
+   },
+   {
+    "group": "Outside SFHA (X, B, C)",
+    "n": 13825,
+    "median": 846,
+    "q1": 631,
+    "q3": 1080
+   }
+  ],
+  "by_zone": [
+   {
+    "zone": "X",
+    "n": 13825,
+    "median": 846,
+    "q1": 631,
+    "q3": 1080
+   },
+   {
+    "zone": "AE",
+    "n": 7469,
+    "median": 946,
+    "q1": 713,
+    "q3": 1258
+   },
+   {
+    "zone": "A",
+    "n": 2473,
+    "median": 906,
+    "q1": 701,
+    "q3": 1096
+   },
+   {
+    "zone": "VE",
+    "n": 248,
+    "median": 1298,
+    "q1": 1104,
+    "q3": 1483
+   },
+   {
+    "zone": "AH",
+    "n": 205,
+    "median": 884,
+    "q1": 716,
+    "q3": 1102
+   }
+  ],
+  "policies_trend": [
+   {
+    "year": 2019,
+    "n": 24379
+   },
+   {
+    "year": 2020,
+    "n": 23590
+   },
+   {
+    "year": 2021,
+    "n": 22987
+   },
+   {
+    "year": 2022,
+    "n": 20615
+   },
+   {
+    "year": 2023,
+    "n": 22634
+   },
+   {
+    "year": 2024,
+    "n": 23726
+   },
+   {
+    "year": 2025,
+    "n": 24220
+   }
+  ]
+ },
+ "claims": {
+  "window": "year of loss 2015-2024",
+  "n_paid": 6851,
+  "median_paid": 55854,
+  "q1": 18944,
+  "q3": 90506,
+  "dollars": "nominal",
+  "median_paid_2024usd": 59476,
+  "top_events": [
+   {
+    "name": "Hurricane Ian",
+    "n": 2909,
+    "share": 0.425
+   },
+   {
+    "name": "Hurricane Milton",
+    "n": 2538,
+    "share": 0.37
+   },
+   {
+    "name": "Hurricane Irma",
+    "n": 725,
+    "share": 0.106
+   },
+   {
+    "name": "Hurricane Nicole",
+    "n": 333,
+    "share": 0.049
+   },
+   {
+    "name": "Hurricane Matthew",
+    "n": 213,
+    "share": 0.031
+   }
+  ],
+  "dominant_event_share": 0.425,
+  "by_year": [
+   {
+    "year": 2015,
+    "n": 1
+   },
+   {
+    "year": 2016,
+    "n": 218
+   },
+   {
+    "year": 2017,
+    "n": 745
+   },
+   {
+    "year": 2018,
+    "n": 6
+   },
+   {
+    "year": 2019,
+    "n": 9
+   },
+   {
+    "year": 2020,
+    "n": 17
+   },
+   {
+    "year": 2021,
+    "n": 10
+   },
+   {
+    "year": 2022,
+    "n": 3263
+   },
+   {
+    "year": 2023,
+    "n": 23
+   },
+   {
+    "year": 2024,
+    "n": 2559
+   }
+  ]
+ },
+ "declarations": {
+  "since": 2000,
+  "n_total": 23,
+  "by_incident_type": {
+   "Flood": 0,
+   "Hurricane": 18,
+   "Severe Storm": 5
+  },
+  "major_only": 15,
+  "latest": [
+   {
+    "id": "DR-4834",
+    "title": "HURRICANE MILTON",
+    "incident_type": "Hurricane",
+    "date": "2024-10-11"
+   },
+   {
+    "id": "EM-3622",
+    "title": "HURRICANE MILTON",
+    "incident_type": "Hurricane",
+    "date": "2024-10-07"
+   },
+   {
+    "id": "DR-4734",
+    "title": "HURRICANE IDALIA",
+    "incident_type": "Hurricane",
+    "date": "2023-08-31"
+   },
+   {
+    "id": "DR-4680",
+    "title": "HURRICANE NICOLE",
+    "incident_type": "Hurricane",
+    "date": "2022-12-13"
+   },
+   {
+    "id": "DR-4673",
+    "title": "HURRICANE IAN",
+    "incident_type": "Hurricane",
+    "date": "2022-09-29"
+   }
+  ]
+ },
+ "owners_assistance": {
+  "since": 2002,
+  "n_inspected": 82956,
+  "damage_bands": [
+   {
+    "band": "No FEMA-inspected damage",
+    "n": 14578
+   },
+   {
+    "band": "$1-$10,000",
+    "n": 60197
+   },
+   {
+    "band": "$10,001-$20,000",
+    "n": 6382
+   },
+   {
+    "band": "$20,001-$30,000",
+    "n": 1172
+   },
+   {
+    "band": "More than $30,000",
+    "n": 627
+   }
+  ],
+  "top_disasters": [
+   {
+    "id": "DR-1545",
+    "n": 21733,
+    "title": "HURRICANE FRANCES",
+    "date": "2004-09-04"
+   },
+   {
+    "id": "DR-1539",
+    "n": 15295,
+    "title": "TROPICAL STORM BONNIE AND HURRICANE CHARLEY",
+    "date": "2004-08-13"
+   },
+   {
+    "id": "DR-4673",
+    "n": 12813,
+    "title": "HURRICANE IAN",
+    "date": "2022-09-29"
+   },
+   {
+    "id": "DR-4337",
+    "n": 9400,
+    "title": "HURRICANE IRMA",
+    "date": "2017-09-10"
+   },
+   {
+    "id": "DR-4283",
+    "n": 6953,
+    "title": "HURRICANE MATTHEW",
+    "date": "2016-10-08"
+   }
+  ]
+ },
+ "compare": {
+  "peers": {
+   "family": "counties",
+   "n": 339
+  },
+  "values": {
+   "policies": 24220,
+   "median_premium": 890,
+   "paid_claims": 6851,
+   "median_paid": 55854,
+   "declarations": 23,
+   "owners_over_30k_share": 0.008
+  },
+  "rank_in_family": {
+   "policies": {
+    "rank": 26,
+    "of": 339
+   },
+   "median_premium": {
+    "rank": 256,
+    "of": 339
+   },
+   "paid_claims": {
+    "rank": 11,
+    "of": 339
+   },
+   "median_paid": {
+    "rank": 28,
+    "of": 339
+   },
+   "declarations": {
+    "rank": 45,
+    "of": 339
+   },
+   "owners_over_30k_share": {
+    "rank": 215,
+    "of": 339
+   }
+  },
+  "national": {
+   "median_premium": 1055,
+   "median_paid": 37248,
+   "owners_over_30k_share": 0.026
+  },
+  "gaps": {
+   "median_premium": {
+    "national": {
+     "ref": 1055,
+     "diff": -165,
+     "rel": -0.156
+    },
+    "state": {
+     "ref": 1002,
+     "diff": -112,
+     "rel": -0.112
+    }
+   },
+   "median_paid": {
+    "national": {
+     "ref": 37248,
+     "diff": 18606,
+     "rel": 0.5
+    },
+    "state": {
+     "ref": 57176,
+     "diff": -1322,
+     "rel": -0.023
+    }
+   },
+   "owners_over_30k_share": {
+    "national": {
+     "ref": 0.026,
+     "diff": -0.018,
+     "rel": -0.692
+    },
+    "state": {
+     "ref": 0.017,
+     "diff": -0.009,
+     "rel": -0.529
+    }
+   },
+   "declarations": {
+    "state_counties": {
+     "ref": 22,
+     "diff": 1,
+     "rel": 0.045
+    }
+   }
+  },
+  "rank_in_state": {
+   "policies": {
+    "rank": 12,
+    "of": 43
+   },
+   "median_premium": {
+    "rank": 29,
+    "of": 43
+   },
+   "paid_claims": {
+    "rank": 6,
+    "of": 43
+   },
+   "median_paid": {
+    "rank": 9,
+    "of": 43
+   },
+   "declarations": {
+    "rank": 13,
+    "of": 43
+   },
+   "owners_over_30k_share": {
+    "rank": 26,
+    "of": 43
+   }
+  },
+  "state": {
+   "median_premium": 1002,
+   "median_paid": 57176,
+   "owners_over_30k_share": 0.017,
+   "counties": 43,
+   "declarations_county_median": 22
+  }
+ },
+ "community_status": {
+  "n": 17,
+  "participating": 17,
+  "crs_classed": 11,
+  "share_classed": 0.647,
+  "best_class": 5,
+  "best_class_communities": [
+   "DAYTONA BEACH SHORES, CITY OF",
+   "DAYTONA BEACH, CITY OF",
+   "NEW SMYRNA BEACH, CITY OF",
+   "ORMOND BEACH, CITY OF",
+   "PONCE INLET, TOWN OF",
+   "PORT ORANGE, CITY OF",
+   "VOLUSIA COUNTY*"
+  ],
+  "oldest_current_map": {
+   "date": "2017-09-29",
+   "community": "DAYTONA BEACH SHORES, CITY OF"
+  },
+  "sanctioned": 0,
+  "suspended": 0,
+  "withdrawn": 0,
+  "not_participating": 0,
+  "communities": [
+   {
+    "id": "125100",
+    "name": "DAYTONA BEACH SHORES, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 5,
+    "sfha_discount_pct": 25,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2017-09-29",
+    "current_map_code": null,
+    "first_firm": "1973-09-07",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "125099",
+    "name": "DAYTONA BEACH, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 5,
+    "sfha_discount_pct": 25,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2017-09-29",
+    "current_map_code": null,
+    "first_firm": "1973-09-07",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "125132",
+    "name": "NEW SMYRNA BEACH, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 5,
+    "sfha_discount_pct": 25,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2017-09-29",
+    "current_map_code": null,
+    "first_firm": "1973-12-07",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "125136",
+    "name": "ORMOND BEACH, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 5,
+    "sfha_discount_pct": 25,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2017-09-29",
+    "current_map_code": null,
+    "first_firm": "1973-09-07",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120312",
+    "name": "PONCE INLET, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 5,
+    "sfha_discount_pct": 25,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2017-09-29",
+    "current_map_code": null,
+    "first_firm": "1976-10-08",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120313",
+    "name": "PORT ORANGE, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 5,
+    "sfha_discount_pct": 25,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2017-09-29",
+    "current_map_code": null,
+    "first_firm": "1977-05-16",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "125155",
+    "name": "VOLUSIA COUNTY*",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 5,
+    "sfha_discount_pct": 25,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2017-09-29",
+    "current_map_code": null,
+    "first_firm": "1973-11-23",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120308",
+    "name": "EDGEWATER, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 6,
+    "sfha_discount_pct": 20,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2017-09-29",
+    "current_map_code": null,
+    "first_firm": "1980-09-03",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120314",
+    "name": "SOUTH DAYTONA, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 7,
+    "sfha_discount_pct": 15,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2017-09-29",
+    "current_map_code": null,
+    "first_firm": "1976-10-08",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "125112",
+    "name": "HOLLY HILL, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 8,
+    "sfha_discount_pct": 10,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2017-09-29",
+    "current_map_code": null,
+    "first_firm": "1973-09-07",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120677",
+    "name": "DELTONA, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 9,
+    "sfha_discount_pct": 5,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2017-09-29",
+    "current_map_code": null,
+    "first_firm": "1973-11-23",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120672",
+    "name": "DEBARY, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2017-09-29",
+    "current_map_code": null,
+    "first_firm": "1973-11-23",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120307",
+    "name": "DELAND, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2017-09-29",
+    "current_map_code": null,
+    "first_firm": "1995-07-03",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120674",
+    "name": "LAKE HELEN, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2017-09-29",
+    "current_map_code": null,
+    "first_firm": "2002-04-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120624",
+    "name": "OAK HILL, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2017-09-29",
+    "current_map_code": null,
+    "first_firm": "1990-06-04",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120633",
+    "name": "ORANGE CITY, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2017-09-29",
+    "current_map_code": null,
+    "first_firm": "1994-09-02",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120675",
+    "name": "PIERSON, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2017-09-29",
+    "current_map_code": null,
+    "first_firm": "2002-04-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   }
+  ],
+  "multi_county_communities": [
+   {
+    "id": "120087",
+    "name": "FLAGLER BEACH, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 6,
+    "sfha_discount_pct": 20,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2018-06-06",
+    "current_map_code": null,
+    "first_firm": "1985-05-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null,
+    "counties": "VOLUSIA COUNTY/FLAGLER COUNTY"
+   }
+  ],
+  "state_join_share": 0.01
+ }
+}

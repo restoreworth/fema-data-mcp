@@ -1,0 +1,752 @@
+{
+ "id": "06013",
+ "kind": "county",
+ "name": "Contra Costa County",
+ "state": "CA",
+ "slug": "contra-costa-county-ca",
+ "generated_at": "2026-10-12T13:15:44Z",
+ "sources": [
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-11",
+   "filter": "policyEffectiveDate ge '2025-01-01' and lt '2026-01-01', per propertyState (rows downloaded, every occupancy; residential and policyCost > 0 kept locally)"
+  },
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "$inlinecount per year 2019-2025: propertyState eq '<ST>' and occupancyType in (1,2,3,11,12,13,14) [and startswith(censusGeoid,'<county FIPS>')]"
+  },
+  {
+   "dataset": "NfipClaims",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipClaims",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "yearOfLoss eq <year> and amountPaidOnBuildingClaim gt 0 (one request per year)"
+  },
+  {
+   "dataset": "CPI-U, U.S. city average, all items (CUUR0000SA0), annual average",
+   "version": "BLS Public Data API v1",
+   "api": "https://api.bls.gov/publicAPI/v1/timeseries/data/",
+   "as_of": "annual averages 2005-2025",
+   "accessed_at": "2026-10-12",
+   "filter": "period M13"
+  },
+  {
+   "dataset": "DisasterDeclarationsSummaries",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/DisasterDeclarationsSummaries",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows); declarationType DR or EM, incidentType Flood, Hurricane, Severe Storm, Severe Storm(s), declarationDate >= 2000 kept locally"
+  },
+  {
+   "dataset": "HousingAssistanceOwners",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/HousingAssistanceOwners",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows)"
+  },
+  {
+   "dataset": "NfipCommunityStatusBook",
+   "version": "v1",
+   "api": "https://www.fema.gov/api/open/v1/NfipCommunityStatusBook",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "all rows; community -> county on the `county` text field"
+  }
+ ],
+ "notes": [
+  "FEMA field definition (NfipPolicies v3, policyCost): \"Calculated in dollars by adding together calculated premium, reserve fund assessment, federal policy fee, and HFIAA surcharge\"",
+  "FEMA field definition (NfipPolicies v3, totalInsurancePremiumOfThePolicy): \"Total Insurance Premium of the Policy in whole dollars. Negative values indicate a refund.\"; policyCost is used because it is what the policyholder pays; policyCost < totalInsurancePremiumOfThePolicy on 0 of 3117116 kept residential policies.",
+  "Premiums: one row = one policy term effective in 2025 (NFIP only, no private insurance); median and quartiles are Hyndman-Fan type 7, rounded half up to the dollar; a cell (State, zone, zone group, county) is published only when n >= 100.",
+  "Flood zones: ratedFloodZone grouped as A1-A30 -> AE, V1-V30 -> VE, B/C/X -> X, AOB -> AO, AHB -> AH, AR* -> AR; zone D and unknown zones are left out of the zone tables.",
+  "policies_trend: residential policy terms per year counted by the API ($inlinecount), all premiums included (policyCost <= 0 too), so the 2025 count can differ from premiums.n (county: the API count also filters propertyState, premiums.n does not).",
+  "Claims: amounts paid by NFIP on building claims (amountPaidOnBuildingClaim > 0), not repair costs; nominal dollars; median_paid_2024usd deflates each claim by its yearOfLoss with CPI-U annual averages (same series and method as nfip-paid-claims-by-state); NfipClaims asOfDate 2026-09-08.",
+  "Declarations: administrative decisions, not measured damage; scope = Flood, Hurricane, Severe Storm, Severe Storm(s), major disaster (DR) and emergency (EM), declared since 2000, counted once per disaster number.",
+  "Owners assistance: FEMA inspections of owner applicants to the Individuals and Households Program (inspected damage bands, not insurance claims or grants); NFIP and IHP figures measure different populations and are never added.",
+  "This product uses the Federal Emergency Management Agency’s OpenFEMA API, but is not endorsed by FEMA. The Federal Government or FEMA cannot vouch for the data or analyses derived from these data after the data have been retrieved from the Agency's website(s).",
+  "County of a policy = first 5 digits of censusGeoid (block group of the address); county of a claim = countyCode. FEMA: \"the County Code field may not reflect the individual county the property is located\".",
+  "Dominant event: California Atmospheric River = 0.423 of paid claims 2015-2024.",
+  "Owners assistance: HousingAssistanceOwners has no FIPS field; rows joined on the county text (DDS designatedArea, then Census 2020 name). HA: \"the applicant has the right to choose the county\"."
+ ],
+ "premiums": {
+  "window": "policies effective 2025",
+  "occupancy": "residential (occupancyType 1,2,3,11,12,13,14)",
+  "field": "policyCost",
+  "n": 2646,
+  "median": 1312,
+  "q1": 1077,
+  "q3": 1812,
+  "by_zone_group": [
+   {
+    "group": "SFHA (A, AE, AH, AO, AR, A99, V, VE)",
+    "n": 1974,
+    "median": 1501,
+    "q1": 1158,
+    "q3": 1996
+   },
+   {
+    "group": "Outside SFHA (X, B, C)",
+    "n": 672,
+    "median": 1080,
+    "q1": 987,
+    "q3": 1197
+   }
+  ],
+  "by_zone": [
+   {
+    "zone": "AE",
+    "n": 1346,
+    "median": 1448,
+    "q1": 1157,
+    "q3": 1873
+   },
+   {
+    "zone": "X",
+    "n": 672,
+    "median": 1080,
+    "q1": 987,
+    "q3": 1197
+   },
+   {
+    "zone": "AO",
+    "n": 414,
+    "median": 1649,
+    "q1": 1192,
+    "q3": 2115
+   },
+   {
+    "zone": "A",
+    "n": 143,
+    "median": 1453,
+    "q1": 1046,
+    "q3": 1985
+   }
+  ],
+  "policies_trend": [
+   {
+    "year": 2019,
+    "n": 3874
+   },
+   {
+    "year": 2020,
+    "n": 3519
+   },
+   {
+    "year": 2021,
+    "n": 3344
+   },
+   {
+    "year": 2022,
+    "n": 3086
+   },
+   {
+    "year": 2023,
+    "n": 2903
+   },
+   {
+    "year": 2024,
+    "n": 2791
+   },
+   {
+    "year": 2025,
+    "n": 2646
+   }
+  ]
+ },
+ "claims": {
+  "window": "year of loss 2015-2024",
+  "n_paid": 104,
+  "median_paid": 18190,
+  "q1": 7326,
+  "q3": 61434,
+  "dollars": "nominal",
+  "median_paid_2024usd": 19867,
+  "top_events": [
+   {
+    "name": "California Atmospheric River",
+    "n": 44,
+    "share": 0.423
+   }
+  ],
+  "dominant_event_share": 0.423,
+  "by_year": [
+   {
+    "year": 2015,
+    "n": 0
+   },
+   {
+    "year": 2016,
+    "n": 4
+   },
+   {
+    "year": 2017,
+    "n": 35
+   },
+   {
+    "year": 2018,
+    "n": 1
+   },
+   {
+    "year": 2019,
+    "n": 4
+   },
+   {
+    "year": 2020,
+    "n": 0
+   },
+   {
+    "year": 2021,
+    "n": 13
+   },
+   {
+    "year": 2022,
+    "n": 31
+   },
+   {
+    "year": 2023,
+    "n": 14
+   },
+   {
+    "year": 2024,
+    "n": 2
+   }
+  ]
+ },
+ "declarations": {
+  "since": 2000,
+  "n_total": 7,
+  "by_incident_type": {
+   "Flood": 4,
+   "Hurricane": 1,
+   "Severe Storm": 2
+  },
+  "major_only": 5,
+  "latest": [
+   {
+    "id": "DR-4683",
+    "title": "SEVERE WINTER STORMS, FLOODING, LANDSLIDES, AND MUDSLIDES",
+    "incident_type": "Flood",
+    "date": "2023-01-14"
+   },
+   {
+    "id": "EM-3591",
+    "title": "SEVERE WINTER STORMS, FLOODING, AND MUDSLIDES",
+    "incident_type": "Flood",
+    "date": "2023-01-09"
+   },
+   {
+    "id": "DR-4308",
+    "title": "SEVERE WINTER STORMS, FLOODING, AND MUDSLIDES",
+    "incident_type": "Flood",
+    "date": "2017-04-01"
+   },
+   {
+    "id": "DR-4305",
+    "title": "SEVERE WINTER STORMS, FLOODING, AND MUDSLIDES",
+    "incident_type": "Flood",
+    "date": "2017-03-16"
+   },
+   {
+    "id": "DR-4301",
+    "title": "SEVERE WINTER STORMS, FLOODING, AND MUDSLIDES",
+    "incident_type": "Severe Storm",
+    "date": "2017-02-14"
+   }
+  ]
+ },
+ "owners_assistance": {
+  "since": 2002,
+  "n_inspected": 957,
+  "damage_bands": [
+   {
+    "band": "No FEMA-inspected damage",
+    "n": 245
+   },
+   {
+    "band": "$1-$10,000",
+    "n": 627
+   },
+   {
+    "band": "$10,001-$20,000",
+    "n": 75
+   },
+   {
+    "band": "$20,001-$30,000",
+    "n": 7
+   },
+   {
+    "band": "More than $30,000",
+    "n": 3
+   }
+  ],
+  "top_disasters": [
+   {
+    "id": "DR-4683",
+    "n": 768,
+    "title": "SEVERE WINTER STORMS, FLOODING, LANDSLIDES, AND MUDSLIDES",
+    "date": "2023-01-14"
+   },
+   {
+    "id": "DR-1628",
+    "n": 189,
+    "title": "SEVERE STORMS, FLOODING, MUDSLIDES, AND LANDSLIDES",
+    "date": "2006-02-03"
+   }
+  ]
+ },
+ "compare": {
+  "peers": {
+   "family": "counties",
+   "n": 339
+  },
+  "values": {
+   "policies": 2646,
+   "median_premium": 1312,
+   "paid_claims": 104,
+   "median_paid": 18190,
+   "declarations": 7,
+   "owners_over_30k_share": 0.003
+  },
+  "rank_in_family": {
+   "policies": {
+    "rank": 144,
+    "of": 339
+   },
+   "median_premium": {
+    "rank": 41,
+    "of": 339
+   },
+   "paid_claims": {
+    "rank": 336,
+    "of": 339
+   },
+   "median_paid": {
+    "rank": 179,
+    "of": 339
+   },
+   "declarations": {
+    "rank": 314,
+    "of": 339
+   },
+   "owners_over_30k_share": {
+    "rank": 272,
+    "of": 339
+   }
+  },
+  "national": {
+   "median_premium": 1055,
+   "median_paid": 37248,
+   "owners_over_30k_share": 0.026
+  },
+  "gaps": {
+   "median_premium": {
+    "national": {
+     "ref": 1055,
+     "diff": 257,
+     "rel": 0.244
+    },
+    "state": {
+     "ref": 1056,
+     "diff": 256,
+     "rel": 0.242
+    }
+   },
+   "median_paid": {
+    "national": {
+     "ref": 37248,
+     "diff": -19058,
+     "rel": -0.512
+    },
+    "state": {
+     "ref": 20115,
+     "diff": -1925,
+     "rel": -0.096
+    }
+   },
+   "owners_over_30k_share": {
+    "national": {
+     "ref": 0.026,
+     "diff": -0.023,
+     "rel": -0.885
+    },
+    "state": {
+     "ref": 0.169,
+     "diff": -0.166,
+     "rel": -0.982
+    }
+   },
+   "declarations": {
+    "state_counties": {
+     "ref": 9,
+     "diff": -2,
+     "rel": -0.222
+    }
+   }
+  },
+  "rank_in_state": {
+   "policies": {
+    "rank": 10,
+    "of": 15
+   },
+   "median_premium": {
+    "rank": 5,
+    "of": 15
+   },
+   "paid_claims": {
+    "rank": 15,
+    "of": 15
+   },
+   "median_paid": {
+    "rank": 10,
+    "of": 15
+   },
+   "declarations": {
+    "rank": 13,
+    "of": 15
+   },
+   "owners_over_30k_share": {
+    "rank": 15,
+    "of": 15
+   }
+  },
+  "state": {
+   "median_premium": 1056,
+   "median_paid": 20115,
+   "owners_over_30k_share": 0.169,
+   "counties": 15,
+   "declarations_county_median": 9
+  }
+ },
+ "community_status": {
+  "n": 20,
+  "participating": 20,
+  "crs_classed": 7,
+  "share_classed": 0.35,
+  "best_class": 6,
+  "best_class_communities": [
+   "CONTRA COSTA COUNTY*",
+   "SAN RAMON, CITY OF"
+  ],
+  "oldest_current_map": {
+   "date": "2009-06-16",
+   "community": "SAN RAMON, CITY OF"
+  },
+  "sanctioned": 0,
+  "suspended": 0,
+  "withdrawn": 0,
+  "not_participating": 0,
+  "communities": [
+   {
+    "id": "060025",
+    "name": "CONTRA COSTA COUNTY*",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 6,
+    "sfha_discount_pct": 20,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2017-03-21",
+    "current_map_code": null,
+    "first_firm": "1987-07-16",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "060710",
+    "name": "SAN RAMON, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 6,
+    "sfha_discount_pct": 20,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2009-06-16",
+    "current_map_code": null,
+    "first_firm": "1985-09-27",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "065022",
+    "name": "CONCORD, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 7,
+    "sfha_discount_pct": 15,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2017-03-21",
+    "current_map_code": null,
+    "first_firm": "1984-07-05",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "065070",
+    "name": "WALNUT CREEK, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 8,
+    "sfha_discount_pct": 10,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2017-03-21",
+    "current_map_code": null,
+    "first_firm": "1985-05-01",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "060034",
+    "name": "PLEASANT HILL, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 9,
+    "sfha_discount_pct": 5,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2017-03-21",
+    "current_map_code": null,
+    "first_firm": "1983-09-30",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "060036",
+    "name": "SAN PABLO, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 9,
+    "sfha_discount_pct": 5,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2017-03-21",
+    "current_map_code": null,
+    "first_firm": "1977-08-01",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "060035",
+    "name": "RICHMOND, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 10,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": 0,
+    "current_map": null,
+    "current_map_code": "NSFHA",
+    "first_firm": "1979-03-01",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "060026",
+    "name": "ANTIOCH, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2017-03-21",
+    "current_map_code": null,
+    "first_firm": "1980-12-02",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "060439",
+    "name": "BRENTWOOD, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2017-03-21",
+    "current_map_code": null,
+    "first_firm": "2009-06-16",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "060027",
+    "name": "CLAYTON, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2017-03-21",
+    "current_map_code": null,
+    "first_firm": "1979-12-04",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "060707",
+    "name": "DANVILLE, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2017-03-21",
+    "current_map_code": null,
+    "first_firm": "1985-09-27",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "065027",
+    "name": "EL CERRITO, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2017-03-21",
+    "current_map_code": null,
+    "first_firm": "1977-06-01",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "060434",
+    "name": "HERCULES, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2017-03-21",
+    "current_map_code": null,
+    "first_firm": "1982-09-30",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "065037",
+    "name": "LAFAYETTE, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2017-03-21",
+    "current_map_code": null,
+    "first_firm": "1981-03-16",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "065044",
+    "name": "MARTINEZ, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2017-03-21",
+    "current_map_code": null,
+    "first_firm": "1978-03-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "060637",
+    "name": "MORAGA, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-06-16",
+    "current_map_code": null,
+    "first_firm": "1981-05-19",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "060766",
+    "name": "OAKLEY, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2017-03-21",
+    "current_map_code": null,
+    "first_firm": "1987-07-16",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "060722",
+    "name": "ORINDA, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-06-16",
+    "current_map_code": null,
+    "first_firm": "1988-01-06",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "060032",
+    "name": "PINOLE, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2017-03-21",
+    "current_map_code": null,
+    "first_firm": "1980-08-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "060033",
+    "name": "PITTSBURG,CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2017-03-21",
+    "current_map_code": null,
+    "first_firm": "1980-08-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   }
+  ],
+  "multi_county_communities": [],
+  "state_join_share": 0.0
+ }
+}

@@ -1,0 +1,1119 @@
+{
+ "id": "36103",
+ "kind": "county",
+ "name": "Suffolk County",
+ "state": "NY",
+ "slug": "suffolk-county-ny",
+ "generated_at": "2026-10-12T13:15:44Z",
+ "sources": [
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-11",
+   "filter": "policyEffectiveDate ge '2025-01-01' and lt '2026-01-01', per propertyState (rows downloaded, every occupancy; residential and policyCost > 0 kept locally)"
+  },
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "$inlinecount per year 2019-2025: propertyState eq '<ST>' and occupancyType in (1,2,3,11,12,13,14) [and startswith(censusGeoid,'<county FIPS>')]"
+  },
+  {
+   "dataset": "NfipClaims",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipClaims",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "yearOfLoss eq <year> and amountPaidOnBuildingClaim gt 0 (one request per year)"
+  },
+  {
+   "dataset": "CPI-U, U.S. city average, all items (CUUR0000SA0), annual average",
+   "version": "BLS Public Data API v1",
+   "api": "https://api.bls.gov/publicAPI/v1/timeseries/data/",
+   "as_of": "annual averages 2005-2025",
+   "accessed_at": "2026-10-12",
+   "filter": "period M13"
+  },
+  {
+   "dataset": "DisasterDeclarationsSummaries",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/DisasterDeclarationsSummaries",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows); declarationType DR or EM, incidentType Flood, Hurricane, Severe Storm, Severe Storm(s), declarationDate >= 2000 kept locally"
+  },
+  {
+   "dataset": "HousingAssistanceOwners",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/HousingAssistanceOwners",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows)"
+  },
+  {
+   "dataset": "NfipCommunityStatusBook",
+   "version": "v1",
+   "api": "https://www.fema.gov/api/open/v1/NfipCommunityStatusBook",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "all rows; community -> county on the `county` text field"
+  }
+ ],
+ "notes": [
+  "FEMA field definition (NfipPolicies v3, policyCost): \"Calculated in dollars by adding together calculated premium, reserve fund assessment, federal policy fee, and HFIAA surcharge\"",
+  "FEMA field definition (NfipPolicies v3, totalInsurancePremiumOfThePolicy): \"Total Insurance Premium of the Policy in whole dollars. Negative values indicate a refund.\"; policyCost is used because it is what the policyholder pays; policyCost < totalInsurancePremiumOfThePolicy on 0 of 3117116 kept residential policies.",
+  "Premiums: one row = one policy term effective in 2025 (NFIP only, no private insurance); median and quartiles are Hyndman-Fan type 7, rounded half up to the dollar; a cell (State, zone, zone group, county) is published only when n >= 100.",
+  "Flood zones: ratedFloodZone grouped as A1-A30 -> AE, V1-V30 -> VE, B/C/X -> X, AOB -> AO, AHB -> AH, AR* -> AR; zone D and unknown zones are left out of the zone tables.",
+  "policies_trend: residential policy terms per year counted by the API ($inlinecount), all premiums included (policyCost <= 0 too), so the 2025 count can differ from premiums.n (county: the API count also filters propertyState, premiums.n does not).",
+  "Claims: amounts paid by NFIP on building claims (amountPaidOnBuildingClaim > 0), not repair costs; nominal dollars; median_paid_2024usd deflates each claim by its yearOfLoss with CPI-U annual averages (same series and method as nfip-paid-claims-by-state); NfipClaims asOfDate 2026-09-08.",
+  "Declarations: administrative decisions, not measured damage; scope = Flood, Hurricane, Severe Storm, Severe Storm(s), major disaster (DR) and emergency (EM), declared since 2000, counted once per disaster number.",
+  "Owners assistance: FEMA inspections of owner applicants to the Individuals and Households Program (inspected damage bands, not insurance claims or grants); NFIP and IHP figures measure different populations and are never added.",
+  "This product uses the Federal Emergency Management Agency’s OpenFEMA API, but is not endorsed by FEMA. The Federal Government or FEMA cannot vouch for the data or analyses derived from these data after the data have been retrieved from the Agency's website(s).",
+  "County of a policy = first 5 digits of censusGeoid (block group of the address); county of a claim = countyCode. FEMA: \"the County Code field may not reflect the individual county the property is located\".",
+  "Dominant event: December Nor'easter = 0.081 of paid claims 2015-2024.",
+  "Owners assistance: HousingAssistanceOwners has no FIPS field; rows joined on the county text (DDS designatedArea, then Census 2020 name). HA: \"the applicant has the right to choose the county\"."
+ ],
+ "premiums": {
+  "window": "policies effective 2025",
+  "occupancy": "residential (occupancyType 1,2,3,11,12,13,14)",
+  "field": "policyCost",
+  "n": 26493,
+  "median": 1293,
+  "q1": 999,
+  "q3": 2028,
+  "by_zone_group": [
+   {
+    "group": "SFHA (A, AE, AH, AO, AR, A99, V, VE)",
+    "n": 14110,
+    "median": 1841,
+    "q1": 1320,
+    "q3": 3151
+   },
+   {
+    "group": "Outside SFHA (X, B, C)",
+    "n": 12383,
+    "median": 1080,
+    "q1": 746,
+    "q3": 1204
+   }
+  ],
+  "by_zone": [
+   {
+    "zone": "AE",
+    "n": 12870,
+    "median": 1834,
+    "q1": 1318,
+    "q3": 3156
+   },
+   {
+    "zone": "X",
+    "n": 12383,
+    "median": 1080,
+    "q1": 746,
+    "q3": 1204
+   },
+   {
+    "zone": "VE",
+    "n": 1190,
+    "median": 1877,
+    "q1": 1337,
+    "q3": 3134
+   }
+  ],
+  "policies_trend": [
+   {
+    "year": 2019,
+    "n": 32809
+   },
+   {
+    "year": 2020,
+    "n": 32046
+   },
+   {
+    "year": 2021,
+    "n": 31471
+   },
+   {
+    "year": 2022,
+    "n": 29383
+   },
+   {
+    "year": 2023,
+    "n": 28025
+   },
+   {
+    "year": 2024,
+    "n": 27462
+   },
+   {
+    "year": 2025,
+    "n": 26493
+   }
+  ]
+ },
+ "claims": {
+  "window": "year of loss 2015-2024",
+  "n_paid": 961,
+  "median_paid": 12983,
+  "q1": 5228,
+  "q3": 41050,
+  "dollars": "nominal",
+  "median_paid_2024usd": 14318,
+  "top_events": [
+   {
+    "name": "December Nor'easter",
+    "n": 78,
+    "share": 0.081
+   },
+   {
+    "name": "Hurricane Ida",
+    "n": 45,
+    "share": 0.047
+   },
+   {
+    "name": "Late-September New York Flooding",
+    "n": 8,
+    "share": 0.008
+   },
+   {
+    "name": "Tropical Storm Henri",
+    "n": 2,
+    "share": 0.002
+   },
+   {
+    "name": "Vermont/New York Flooding",
+    "n": 1,
+    "share": 0.001
+   }
+  ],
+  "dominant_event_share": 0.081,
+  "by_year": [
+   {
+    "year": 2015,
+    "n": 13
+   },
+   {
+    "year": 2016,
+    "n": 21
+   },
+   {
+    "year": 2017,
+    "n": 96
+   },
+   {
+    "year": 2018,
+    "n": 108
+   },
+   {
+    "year": 2019,
+    "n": 50
+   },
+   {
+    "year": 2020,
+    "n": 27
+   },
+   {
+    "year": 2021,
+    "n": 87
+   },
+   {
+    "year": 2022,
+    "n": 50
+   },
+   {
+    "year": 2023,
+    "n": 130
+   },
+   {
+    "year": 2024,
+    "n": 379
+   }
+  ]
+ },
+ "declarations": {
+  "since": 2000,
+  "n_total": 17,
+  "by_incident_type": {
+   "Flood": 0,
+   "Hurricane": 9,
+   "Severe Storm": 8
+  },
+  "major_only": 11,
+  "latest": [
+   {
+    "id": "DR-4839",
+    "title": "SEVERE STORM AND FLOODING",
+    "incident_type": "Severe Storm",
+    "date": "2024-10-21"
+   },
+   {
+    "id": "EM-3613",
+    "title": "SEVERE STORM AND FLOODING",
+    "incident_type": "Severe Storm",
+    "date": "2024-08-25"
+   },
+   {
+    "id": "DR-4615",
+    "title": "REMNANTS OF HURRICANE IDA",
+    "incident_type": "Hurricane",
+    "date": "2021-09-05"
+   },
+   {
+    "id": "EM-3572",
+    "title": "REMNANTS OF HURRICANE IDA",
+    "incident_type": "Hurricane",
+    "date": "2021-09-02"
+   },
+   {
+    "id": "EM-3565",
+    "title": "HURRICANE HENRI",
+    "incident_type": "Hurricane",
+    "date": "2021-08-22"
+   }
+  ]
+ },
+ "owners_assistance": {
+  "since": 2002,
+  "n_inspected": 16278,
+  "damage_bands": [
+   {
+    "band": "No FEMA-inspected damage",
+    "n": 2531
+   },
+   {
+    "band": "$1-$10,000",
+    "n": 7483
+   },
+   {
+    "band": "$10,001-$20,000",
+    "n": 2540
+   },
+   {
+    "band": "$20,001-$30,000",
+    "n": 1861
+   },
+   {
+    "band": "More than $30,000",
+    "n": 1863
+   }
+  ],
+  "top_disasters": [
+   {
+    "id": "DR-4085",
+    "n": 13342,
+    "title": "HURRICANE SANDY",
+    "date": "2012-10-30"
+   },
+   {
+    "id": "DR-4615",
+    "n": 1840,
+    "title": "REMNANTS OF HURRICANE IDA",
+    "date": "2021-09-05"
+   },
+   {
+    "id": "DR-4020",
+    "n": 1096,
+    "title": "HURRICANE IRENE",
+    "date": "2011-08-31"
+   }
+  ]
+ },
+ "compare": {
+  "peers": {
+   "family": "counties",
+   "n": 339
+  },
+  "values": {
+   "policies": 26493,
+   "median_premium": 1293,
+   "paid_claims": 961,
+   "median_paid": 12983,
+   "declarations": 17,
+   "owners_over_30k_share": 0.114
+  },
+  "rank_in_family": {
+   "policies": {
+    "rank": 24,
+    "of": 339
+   },
+   "median_premium": {
+    "rank": 52,
+    "of": 339
+   },
+   "paid_claims": {
+    "rank": 70,
+    "of": 339
+   },
+   "median_paid": {
+    "rank": 247,
+    "of": 339
+   },
+   "declarations": {
+    "rank": 110,
+    "of": 339
+   },
+   "owners_over_30k_share": {
+    "rank": 22,
+    "of": 339
+   }
+  },
+  "national": {
+   "median_premium": 1055,
+   "median_paid": 37248,
+   "owners_over_30k_share": 0.026
+  },
+  "gaps": {
+   "median_premium": {
+    "national": {
+     "ref": 1055,
+     "diff": 238,
+     "rel": 0.226
+    },
+    "state": {
+     "ref": 1206,
+     "diff": 87,
+     "rel": 0.072
+    }
+   },
+   "median_paid": {
+    "national": {
+     "ref": 37248,
+     "diff": -24265,
+     "rel": -0.651
+    },
+    "state": {
+     "ref": 14833,
+     "diff": -1850,
+     "rel": -0.125
+    }
+   },
+   "owners_over_30k_share": {
+    "national": {
+     "ref": 0.026,
+     "diff": 0.088,
+     "rel": 3.385
+    },
+    "state": {
+     "ref": 0.069,
+     "diff": 0.045,
+     "rel": 0.652
+    }
+   },
+   "declarations": {
+    "state_counties": {
+     "ref": 13,
+     "diff": 4,
+     "rel": 0.308
+    }
+   }
+  },
+  "rank_in_state": {
+   "policies": {
+    "rank": 2,
+    "of": 12
+   },
+   "median_premium": {
+    "rank": 2,
+    "of": 12
+   },
+   "paid_claims": {
+    "rank": 3,
+    "of": 12
+   },
+   "median_paid": {
+    "rank": 8,
+    "of": 12
+   },
+   "declarations": {
+    "rank": 2,
+    "of": 12
+   },
+   "owners_over_30k_share": {
+    "rank": 2,
+    "of": 12
+   }
+  },
+  "state": {
+   "median_premium": 1206,
+   "median_paid": 14833,
+   "owners_over_30k_share": 0.069,
+   "counties": 12,
+   "declarations_county_median": 13
+  }
+ },
+ "community_status": {
+  "n": 43,
+  "participating": 43,
+  "crs_classed": 5,
+  "share_classed": 0.116,
+  "best_class": 10,
+  "best_class_communities": [
+   "BABYLON,TOWN OF",
+   "BRIGHTWATERS, VILLAGE OF",
+   "NORTHPORT, VILLAGE OF",
+   "SOUTHAMPTON, TOWN OF",
+   "SOUTHAMPTON, VILLAGE OF"
+  ],
+  "oldest_current_map": {
+   "date": "2009-09-25",
+   "community": "BABYLON,TOWN OF"
+  },
+  "sanctioned": 0,
+  "suspended": 0,
+  "withdrawn": 0,
+  "not_participating": 0,
+  "communities": [
+   {
+    "id": "360790",
+    "name": "BABYLON,TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 10,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": 0,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1979-07-16",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "361342",
+    "name": "BRIGHTWATERS, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 10,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": 0,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1982-09-02",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "360801",
+    "name": "NORTHPORT, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 10,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": 0,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1983-04-18",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "365342",
+    "name": "SOUTHAMPTON, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 10,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": 0,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1973-09-28",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "365343",
+    "name": "SOUTHAMPTON, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 10,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": 0,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1975-09-12",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "360788",
+    "name": "AMITYVILLE, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1977-09-01",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "365333",
+    "name": "ASHAROKEN, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1971-08-20",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "360791",
+    "name": "BABYLON, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1977-08-01",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "361532",
+    "name": "BELLE TERRE, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1983-03-16",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "361069",
+    "name": "BELLPORT, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1982-10-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "365334",
+    "name": "BROOKHAVEN,TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1972-08-31",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "361524",
+    "name": "DERING HARBOR, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1978-08-11",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "360794",
+    "name": "EAST HAMPTON,TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1976-09-30",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "360795",
+    "name": "EAST HAMPTON,VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1980-09-30",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "361004",
+    "name": "GREENPORT, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1983-06-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "361513",
+    "name": "HEAD OF THE HARBOR, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1983-08-01",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "361543",
+    "name": "HUNTINGTON BAY, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1983-04-18",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "360796",
+    "name": "HUNTINGTON, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1978-11-01",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "361623",
+    "name": "ISLANDIA, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": "M",
+    "first_firm": "1970-10-16",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "365337",
+    "name": "ISLIP,TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1970-10-16",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "361624",
+    "name": "LAKE GROVE, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": null,
+    "current_map_code": "NSFHA",
+    "first_firm": "1998-05-04",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "360798",
+    "name": "LINDENHURST, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1977-08-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "360799",
+    "name": "LLOYD HARBOR, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1978-02-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "360678",
+    "name": "MASTIC BEACH, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "2009-09-25",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "361510",
+    "name": "NISSEQUOGUE, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1983-05-16",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "360800",
+    "name": "NORTH HAVEN, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1977-09-30",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "365339",
+    "name": "OCEAN BEACH, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1970-05-05",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "361545",
+    "name": "OLD FIELD, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1983-04-18",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "360803",
+    "name": "PATCHOGUE, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1982-11-03",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "361518",
+    "name": "POQUOTT, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1983-08-01",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "360804",
+    "name": "PORT JEFFERSON, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1983-03-02",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "360806",
+    "name": "QUOGUE, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1977-05-16",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "360805",
+    "name": "RIVERHEAD, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1978-03-01",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "360807",
+    "name": "SAG HARBOR, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1978-01-05",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "361487",
+    "name": "SAGAPONACK, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1973-09-28",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "365341",
+    "name": "SALTAIRE,VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1971-08-06",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "360809",
+    "name": "SHELTER ISLAND, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1978-02-01",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "361506",
+    "name": "SHOREHAM, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1983-03-16",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "360810",
+    "name": "SMITHTOWN, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1978-12-01",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "360813",
+    "name": "SOUTHOLD,TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1980-03-18",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "361551",
+    "name": "THE BRANCH, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1982-11-17",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "361649",
+    "name": "WEST HAMPTON DUNES, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1973-09-28",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "365345",
+    "name": "WESTHAMPTON BEACH, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2009-09-25",
+    "current_map_code": null,
+    "first_firm": "1974-07-01",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   }
+  ],
+  "multi_county_communities": [],
+  "state_join_share": 0.005
+ }
+}

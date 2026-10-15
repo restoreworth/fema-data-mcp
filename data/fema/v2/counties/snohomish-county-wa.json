@@ -1,0 +1,774 @@
+{
+ "id": "53061",
+ "kind": "county",
+ "name": "Snohomish County",
+ "state": "WA",
+ "slug": "snohomish-county-wa",
+ "generated_at": "2026-10-12T13:15:44Z",
+ "sources": [
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-11",
+   "filter": "policyEffectiveDate ge '2025-01-01' and lt '2026-01-01', per propertyState (rows downloaded, every occupancy; residential and policyCost > 0 kept locally)"
+  },
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "$inlinecount per year 2019-2025: propertyState eq '<ST>' and occupancyType in (1,2,3,11,12,13,14) [and startswith(censusGeoid,'<county FIPS>')]"
+  },
+  {
+   "dataset": "NfipClaims",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipClaims",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "yearOfLoss eq <year> and amountPaidOnBuildingClaim gt 0 (one request per year)"
+  },
+  {
+   "dataset": "CPI-U, U.S. city average, all items (CUUR0000SA0), annual average",
+   "version": "BLS Public Data API v1",
+   "api": "https://api.bls.gov/publicAPI/v1/timeseries/data/",
+   "as_of": "annual averages 2005-2025",
+   "accessed_at": "2026-10-12",
+   "filter": "period M13"
+  },
+  {
+   "dataset": "DisasterDeclarationsSummaries",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/DisasterDeclarationsSummaries",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows); declarationType DR or EM, incidentType Flood, Hurricane, Severe Storm, Severe Storm(s), declarationDate >= 2000 kept locally"
+  },
+  {
+   "dataset": "HousingAssistanceOwners",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/HousingAssistanceOwners",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows)"
+  },
+  {
+   "dataset": "NfipCommunityStatusBook",
+   "version": "v1",
+   "api": "https://www.fema.gov/api/open/v1/NfipCommunityStatusBook",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "all rows; community -> county on the `county` text field"
+  }
+ ],
+ "notes": [
+  "FEMA field definition (NfipPolicies v3, policyCost): \"Calculated in dollars by adding together calculated premium, reserve fund assessment, federal policy fee, and HFIAA surcharge\"",
+  "FEMA field definition (NfipPolicies v3, totalInsurancePremiumOfThePolicy): \"Total Insurance Premium of the Policy in whole dollars. Negative values indicate a refund.\"; policyCost is used because it is what the policyholder pays; policyCost < totalInsurancePremiumOfThePolicy on 0 of 3117116 kept residential policies.",
+  "Premiums: one row = one policy term effective in 2025 (NFIP only, no private insurance); median and quartiles are Hyndman-Fan type 7, rounded half up to the dollar; a cell (State, zone, zone group, county) is published only when n >= 100.",
+  "Flood zones: ratedFloodZone grouped as A1-A30 -> AE, V1-V30 -> VE, B/C/X -> X, AOB -> AO, AHB -> AH, AR* -> AR; zone D and unknown zones are left out of the zone tables.",
+  "policies_trend: residential policy terms per year counted by the API ($inlinecount), all premiums included (policyCost <= 0 too), so the 2025 count can differ from premiums.n (county: the API count also filters propertyState, premiums.n does not).",
+  "Claims: amounts paid by NFIP on building claims (amountPaidOnBuildingClaim > 0), not repair costs; nominal dollars; median_paid_2024usd deflates each claim by its yearOfLoss with CPI-U annual averages (same series and method as nfip-paid-claims-by-state); NfipClaims asOfDate 2026-09-08.",
+  "Declarations: administrative decisions, not measured damage; scope = Flood, Hurricane, Severe Storm, Severe Storm(s), major disaster (DR) and emergency (EM), declared since 2000, counted once per disaster number.",
+  "Owners assistance: FEMA inspections of owner applicants to the Individuals and Households Program (inspected damage bands, not insurance claims or grants); NFIP and IHP figures measure different populations and are never added.",
+  "This product uses the Federal Emergency Management Agency’s OpenFEMA API, but is not endorsed by FEMA. The Federal Government or FEMA cannot vouch for the data or analyses derived from these data after the data have been retrieved from the Agency's website(s).",
+  "County of a policy = first 5 digits of censusGeoid (block group of the address); county of a claim = countyCode. FEMA: \"the County Code field may not reflect the individual county the property is located\".",
+  "No named flood event on the paid claims.",
+  "Owners assistance: HousingAssistanceOwners has no FIPS field; rows joined on the county text (DDS designatedArea, then Census 2020 name). HA: \"the applicant has the right to choose the county\"."
+ ],
+ "premiums": {
+  "window": "policies effective 2025",
+  "occupancy": "residential (occupancyType 1,2,3,11,12,13,14)",
+  "field": "policyCost",
+  "n": 1801,
+  "median": 1071,
+  "q1": 748,
+  "q3": 1750,
+  "by_zone_group": [
+   {
+    "group": "SFHA (A, AE, AH, AO, AR, A99, V, VE)",
+    "n": 1411,
+    "median": 1146,
+    "q1": 867,
+    "q3": 2071
+   },
+   {
+    "group": "Outside SFHA (X, B, C)",
+    "n": 390,
+    "median": 675,
+    "q1": 461,
+    "q3": 1080
+   }
+  ],
+  "by_zone": [
+   {
+    "zone": "AE",
+    "n": 1134,
+    "median": 1160,
+    "q1": 860,
+    "q3": 2150
+   },
+   {
+    "zone": "X",
+    "n": 390,
+    "median": 675,
+    "q1": 461,
+    "q3": 1080
+   },
+   {
+    "zone": "A",
+    "n": 183,
+    "median": 1117,
+    "q1": 923,
+    "q3": 1529
+   }
+  ],
+  "policies_trend": [
+   {
+    "year": 2019,
+    "n": 2128
+   },
+   {
+    "year": 2020,
+    "n": 2252
+   },
+   {
+    "year": 2021,
+    "n": 2160
+   },
+   {
+    "year": 2022,
+    "n": 2023
+   },
+   {
+    "year": 2023,
+    "n": 1917
+   },
+   {
+    "year": 2024,
+    "n": 1851
+   },
+   {
+    "year": 2025,
+    "n": 1801
+   }
+  ]
+ },
+ "claims": {
+  "window": "year of loss 2015-2024",
+  "n_paid": 176,
+  "median_paid": 10359,
+  "q1": 3654,
+  "q3": 25490,
+  "dollars": "nominal",
+  "median_paid_2024usd": 13543,
+  "top_events": [],
+  "dominant_event_share": null,
+  "by_year": [
+   {
+    "year": 2015,
+    "n": 108
+   },
+   {
+    "year": 2016,
+    "n": 13
+   },
+   {
+    "year": 2017,
+    "n": 2
+   },
+   {
+    "year": 2018,
+    "n": 5
+   },
+   {
+    "year": 2019,
+    "n": 4
+   },
+   {
+    "year": 2020,
+    "n": 10
+   },
+   {
+    "year": 2021,
+    "n": 2
+   },
+   {
+    "year": 2022,
+    "n": 6
+   },
+   {
+    "year": 2023,
+    "n": 26
+   },
+   {
+    "year": 2024,
+    "n": 0
+   }
+  ]
+ },
+ "declarations": {
+  "since": 2000,
+  "n_total": 16,
+  "by_incident_type": {
+   "Flood": 4,
+   "Hurricane": 0,
+   "Severe Storm": 12
+  },
+  "major_only": 15,
+  "latest": [
+   {
+    "id": "DR-4906",
+    "title": "SEVERE STORMS, STRAIGHT-LINE WINDS, FLOODING, LANDSLIDES, AND MUDSLIDES",
+    "incident_type": "Flood",
+    "date": "2026-04-07"
+   },
+   {
+    "id": "EM-3629",
+    "title": "SEVERE STORMS, STRAIGHT-LINE WINDS, FLOODING, LANDSLIDES, AND MUDSLIDES",
+    "incident_type": "Flood",
+    "date": "2025-12-12"
+   },
+   {
+    "id": "DR-4682",
+    "title": "SEVERE WINTER STORM, STRAIGHT-LINE WINDS, FLOODING, LANDSLIDES, AND MUDSLIDES",
+    "incident_type": "Severe Storm",
+    "date": "2023-01-12"
+   },
+   {
+    "id": "DR-4593",
+    "title": "SEVERE WINTER STORM, STRAIGHT-LINE WINDS, FLOODING, LANDSLIDES, AND MUDSLIDES",
+    "incident_type": "Severe Storm",
+    "date": "2021-04-08"
+   },
+   {
+    "id": "DR-4539",
+    "title": "SEVERE STORMS, FLOODING, LANDSLIDES, AND MUDSLIDES",
+    "incident_type": "Flood",
+    "date": "2020-04-23"
+   }
+  ]
+ },
+ "owners_assistance": {
+  "since": 2002,
+  "n_inspected": 1177,
+  "damage_bands": [
+   {
+    "band": "No FEMA-inspected damage",
+    "n": 242
+   },
+   {
+    "band": "$1-$10,000",
+    "n": 691
+   },
+   {
+    "band": "$10,001-$20,000",
+    "n": 123
+   },
+   {
+    "band": "$20,001-$30,000",
+    "n": 59
+   },
+   {
+    "band": "More than $30,000",
+    "n": 62
+   }
+  ],
+  "top_disasters": [
+   {
+    "id": "DR-1671",
+    "n": 326,
+    "title": "SEVERE STORMS, FLOODING, LANDSLIDES, AND MUDSLIDES",
+    "date": "2006-12-12"
+   },
+   {
+    "id": "DR-1817",
+    "n": 274,
+    "title": "SEVERE WINTER STORM, LANDSLIDES, MUDSLIDES, AND FLOODING",
+    "date": "2009-01-30"
+   },
+   {
+    "id": "DR-1734",
+    "n": 214,
+    "title": "SEVERE STORMS, FLOODING, LANDSLIDES, AND MUDSLIDES",
+    "date": "2007-12-08"
+   },
+   {
+    "id": "DR-4906",
+    "n": 146,
+    "title": "SEVERE STORMS, STRAIGHT-LINE WINDS, FLOODING, LANDSLIDES, AND MUDSLIDES",
+    "date": "2026-04-07"
+   },
+   {
+    "id": "DR-1499",
+    "n": 141,
+    "title": "SEVERE STORMS AND FLOODING",
+    "date": "2003-11-07"
+   }
+  ]
+ },
+ "compare": {
+  "peers": {
+   "family": "counties",
+   "n": 339
+  },
+  "values": {
+   "policies": 1801,
+   "median_premium": 1071,
+   "paid_claims": 176,
+   "median_paid": 10359,
+   "declarations": 16,
+   "owners_over_30k_share": 0.053
+  },
+  "rank_in_family": {
+   "policies": {
+    "rank": 176,
+    "of": 339
+   },
+   "median_premium": {
+    "rank": 167,
+    "of": 339
+   },
+   "paid_claims": {
+    "rank": 241,
+    "of": 339
+   },
+   "median_paid": {
+    "rank": 284,
+    "of": 339
+   },
+   "declarations": {
+    "rank": 127,
+    "of": 339
+   },
+   "owners_over_30k_share": {
+    "rank": 53,
+    "of": 339
+   }
+  },
+  "national": {
+   "median_premium": 1055,
+   "median_paid": 37248,
+   "owners_over_30k_share": 0.026
+  },
+  "gaps": {
+   "median_premium": {
+    "national": {
+     "ref": 1055,
+     "diff": 16,
+     "rel": 0.015
+    },
+    "state": {
+     "ref": 1049,
+     "diff": 22,
+     "rel": 0.021
+    }
+   },
+   "median_paid": {
+    "national": {
+     "ref": 37248,
+     "diff": -26889,
+     "rel": -0.722
+    },
+    "state": {
+     "ref": 16051,
+     "diff": -5692,
+     "rel": -0.355
+    }
+   },
+   "owners_over_30k_share": {
+    "national": {
+     "ref": 0.026,
+     "diff": 0.027,
+     "rel": 1.038
+    },
+    "state": {
+     "ref": 0.062,
+     "diff": -0.009,
+     "rel": -0.145
+    }
+   },
+   "declarations": {
+    "state_counties": {
+     "ref": 16,
+     "diff": 0,
+     "rel": 0.0
+    }
+   }
+  },
+  "rank_in_state": {
+   "policies": {
+    "rank": 2,
+    "of": 5
+   },
+   "median_premium": {
+    "rank": 3,
+    "of": 5
+   },
+   "paid_claims": {
+    "rank": 4,
+    "of": 5
+   },
+   "median_paid": {
+    "rank": 5,
+    "of": 5
+   },
+   "declarations": {
+    "rank": 3,
+    "of": 5
+   },
+   "owners_over_30k_share": {
+    "rank": 2,
+    "of": 5
+   }
+  },
+  "state": {
+   "median_premium": 1049,
+   "median_paid": 16051,
+   "owners_over_30k_share": 0.062,
+   "counties": 5,
+   "declarations_county_median": 16
+  }
+ },
+ "community_status": {
+  "n": 20,
+  "participating": 19,
+  "crs_classed": 4,
+  "share_classed": 0.2,
+  "best_class": 5,
+  "best_class_communities": [
+   "MONROE, CITY OF",
+   "SNOHOMISH COUNTY *"
+  ],
+  "oldest_current_map": {
+   "date": "2020-06-19",
+   "community": "MONROE, CITY OF"
+  },
+  "sanctioned": 1,
+  "suspended": 0,
+  "withdrawn": 0,
+  "not_participating": 1,
+  "communities": [
+   {
+    "id": "530169",
+    "name": "MONROE, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 5,
+    "sfha_discount_pct": 25,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2020-06-19",
+    "current_map_code": null,
+    "first_firm": "1983-12-01",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "535534",
+    "name": "SNOHOMISH COUNTY *",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 5,
+    "sfha_discount_pct": 25,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2020-06-19",
+    "current_map_code": null,
+    "first_firm": "1984-03-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "530173",
+    "name": "SULTAN, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 6,
+    "sfha_discount_pct": 20,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2020-06-19",
+    "current_map_code": null,
+    "first_firm": "1983-09-30",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "530166",
+    "name": "INDEX, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 8,
+    "sfha_discount_pct": 10,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2020-06-19",
+    "current_map_code": null,
+    "first_firm": "1983-12-01",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "530271",
+    "name": "ARLINGTON, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-06-19",
+    "current_map_code": null,
+    "first_firm": "1983-11-16",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "530276",
+    "name": "BRIER, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-06-19",
+    "current_map_code": null,
+    "first_firm": "1984-09-24",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "530233",
+    "name": "DARRINGTON, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-06-19",
+    "current_map_code": null,
+    "first_firm": "1985-08-19",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "530163",
+    "name": "EDMONDS, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-06-19",
+    "current_map_code": null,
+    "first_firm": "1978-08-08",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "530164",
+    "name": "EVERETT, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-06-19",
+    "current_map_code": null,
+    "first_firm": "1978-04-03",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "530285",
+    "name": "GOLD BAR, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-06-19",
+    "current_map_code": null,
+    "first_firm": "1983-12-01",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "530287",
+    "name": "GRANITE FALLS, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-06-19",
+    "current_map_code": null,
+    "first_firm": "1999-11-08",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "530291",
+    "name": "LAKE STEVENS, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-06-19",
+    "current_map_code": null,
+    "first_firm": "1989-04-17",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "530167",
+    "name": "LYNNWOOD, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-06-19",
+    "current_map_code": null,
+    "first_firm": "1985-06-05",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "530168",
+    "name": "MARYSVILLE, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-06-19",
+    "current_map_code": null,
+    "first_firm": "1984-02-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "530330",
+    "name": "MILL CREEK, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-06-19",
+    "current_map_code": null,
+    "first_firm": "1999-11-08",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "530170",
+    "name": "MOUNTLAKE TERRACE, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-06-19",
+    "current_map_code": null,
+    "first_firm": "1985-08-19",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "530235",
+    "name": "MUKILTEO, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-06-19",
+    "current_map_code": null,
+    "first_firm": "1986-02-19",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "530171",
+    "name": "SNOHOMISH, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-06-19",
+    "current_map_code": null,
+    "first_firm": "1983-11-16",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "530172",
+    "name": "STANWOOD, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-06-19",
+    "current_map_code": null,
+    "first_firm": "1983-11-16",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "530308",
+    "name": "WOODWAY, TOWN OF",
+    "participating": false,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-06-19",
+    "current_map_code": null,
+    "first_firm": "1986-07-03",
+    "sanction": true,
+    "sanction_date": "1976-09-19",
+    "sanction_code": null
+   }
+  ],
+  "multi_county_communities": [
+   {
+    "id": "530075",
+    "name": "BOTHELL, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-08-19",
+    "current_map_code": null,
+    "first_firm": "1982-06-01",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null,
+    "counties": "SNOHOMISH COUNTY/KING COUNTY"
+   }
+  ],
+  "state_join_share": 0.013
+ }
+}

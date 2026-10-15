@@ -1,0 +1,605 @@
+{
+ "id": "12071",
+ "kind": "county",
+ "name": "Lee County",
+ "state": "FL",
+ "slug": "lee-county-fl",
+ "generated_at": "2026-10-12T13:15:44Z",
+ "sources": [
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-11",
+   "filter": "policyEffectiveDate ge '2025-01-01' and lt '2026-01-01', per propertyState (rows downloaded, every occupancy; residential and policyCost > 0 kept locally)"
+  },
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "$inlinecount per year 2019-2025: propertyState eq '<ST>' and occupancyType in (1,2,3,11,12,13,14) [and startswith(censusGeoid,'<county FIPS>')]"
+  },
+  {
+   "dataset": "NfipClaims",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipClaims",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "yearOfLoss eq <year> and amountPaidOnBuildingClaim gt 0 (one request per year)"
+  },
+  {
+   "dataset": "CPI-U, U.S. city average, all items (CUUR0000SA0), annual average",
+   "version": "BLS Public Data API v1",
+   "api": "https://api.bls.gov/publicAPI/v1/timeseries/data/",
+   "as_of": "annual averages 2005-2025",
+   "accessed_at": "2026-10-12",
+   "filter": "period M13"
+  },
+  {
+   "dataset": "DisasterDeclarationsSummaries",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/DisasterDeclarationsSummaries",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows); declarationType DR or EM, incidentType Flood, Hurricane, Severe Storm, Severe Storm(s), declarationDate >= 2000 kept locally"
+  },
+  {
+   "dataset": "HousingAssistanceOwners",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/HousingAssistanceOwners",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows)"
+  },
+  {
+   "dataset": "NfipCommunityStatusBook",
+   "version": "v1",
+   "api": "https://www.fema.gov/api/open/v1/NfipCommunityStatusBook",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "all rows; community -> county on the `county` text field"
+  }
+ ],
+ "notes": [
+  "FEMA field definition (NfipPolicies v3, policyCost): \"Calculated in dollars by adding together calculated premium, reserve fund assessment, federal policy fee, and HFIAA surcharge\"",
+  "FEMA field definition (NfipPolicies v3, totalInsurancePremiumOfThePolicy): \"Total Insurance Premium of the Policy in whole dollars. Negative values indicate a refund.\"; policyCost is used because it is what the policyholder pays; policyCost < totalInsurancePremiumOfThePolicy on 0 of 3117116 kept residential policies.",
+  "Premiums: one row = one policy term effective in 2025 (NFIP only, no private insurance); median and quartiles are Hyndman-Fan type 7, rounded half up to the dollar; a cell (State, zone, zone group, county) is published only when n >= 100.",
+  "Flood zones: ratedFloodZone grouped as A1-A30 -> AE, V1-V30 -> VE, B/C/X -> X, AOB -> AO, AHB -> AH, AR* -> AR; zone D and unknown zones are left out of the zone tables.",
+  "policies_trend: residential policy terms per year counted by the API ($inlinecount), all premiums included (policyCost <= 0 too), so the 2025 count can differ from premiums.n (county: the API count also filters propertyState, premiums.n does not).",
+  "Claims: amounts paid by NFIP on building claims (amountPaidOnBuildingClaim > 0), not repair costs; nominal dollars; median_paid_2024usd deflates each claim by its yearOfLoss with CPI-U annual averages (same series and method as nfip-paid-claims-by-state); NfipClaims asOfDate 2026-09-08.",
+  "Declarations: administrative decisions, not measured damage; scope = Flood, Hurricane, Severe Storm, Severe Storm(s), major disaster (DR) and emergency (EM), declared since 2000, counted once per disaster number.",
+  "Owners assistance: FEMA inspections of owner applicants to the Individuals and Households Program (inspected damage bands, not insurance claims or grants); NFIP and IHP figures measure different populations and are never added.",
+  "This product uses the Federal Emergency Management Agency’s OpenFEMA API, but is not endorsed by FEMA. The Federal Government or FEMA cannot vouch for the data or analyses derived from these data after the data have been retrieved from the Agency's website(s).",
+  "County of a policy = first 5 digits of censusGeoid (block group of the address); county of a claim = countyCode. FEMA: \"the County Code field may not reflect the individual county the property is located\".",
+  "Dominant event: Hurricane Ian = 0.746 of paid claims 2015-2024.",
+  "Owners assistance: HousingAssistanceOwners has no FIPS field; rows joined on the county text (DDS designatedArea, then Census 2020 name). HA: \"the applicant has the right to choose the county\"."
+ ],
+ "premiums": {
+  "window": "policies effective 2025",
+  "occupancy": "residential (occupancyType 1,2,3,11,12,13,14)",
+  "field": "policyCost",
+  "n": 76344,
+  "median": 1663,
+  "q1": 1083,
+  "q3": 2879,
+  "by_zone_group": [
+   {
+    "group": "SFHA (A, AE, AH, AO, AR, A99, V, VE)",
+    "n": 61906,
+    "median": 1968,
+    "q1": 1253,
+    "q3": 3210
+   },
+   {
+    "group": "Outside SFHA (X, B, C)",
+    "n": 14438,
+    "median": 1083,
+    "q1": 973,
+    "q3": 1087
+   }
+  ],
+  "by_zone": [
+   {
+    "zone": "AE",
+    "n": 60158,
+    "median": 1973,
+    "q1": 1259,
+    "q3": 3216
+   },
+   {
+    "zone": "X",
+    "n": 14438,
+    "median": 1083,
+    "q1": 973,
+    "q3": 1087
+   },
+   {
+    "zone": "VE",
+    "n": 702,
+    "median": 3806,
+    "q1": 1467,
+    "q3": 6469
+   },
+   {
+    "zone": "AH",
+    "n": 643,
+    "median": 1013,
+    "q1": 845,
+    "q3": 1156
+   },
+   {
+    "zone": "A",
+    "n": 379,
+    "median": 686,
+    "q1": 521,
+    "q3": 1087
+   }
+  ],
+  "policies_trend": [
+   {
+    "year": 2019,
+    "n": 92816
+   },
+   {
+    "year": 2020,
+    "n": 94536
+   },
+   {
+    "year": 2021,
+    "n": 93467
+   },
+   {
+    "year": 2022,
+    "n": 79119
+   },
+   {
+    "year": 2023,
+    "n": 79088
+   },
+   {
+    "year": 2024,
+    "n": 78053
+   },
+   {
+    "year": 2025,
+    "n": 76344
+   }
+  ]
+ },
+ "claims": {
+  "window": "year of loss 2015-2024",
+  "n_paid": 29920,
+  "median_paid": 69662,
+  "q1": 16586,
+  "q3": 138180,
+  "dollars": "nominal",
+  "median_paid_2024usd": 74170,
+  "top_events": [
+   {
+    "name": "Hurricane Ian",
+    "n": 22317,
+    "share": 0.746
+   },
+   {
+    "name": "Hurricane Milton",
+    "n": 3457,
+    "share": 0.116
+   },
+   {
+    "name": "Hurricane Helene",
+    "n": 2324,
+    "share": 0.078
+   },
+   {
+    "name": "Hurricane Irma",
+    "n": 1066,
+    "share": 0.036
+   },
+   {
+    "name": "Hurricane Debby",
+    "n": 69,
+    "share": 0.002
+   }
+  ],
+  "dominant_event_share": 0.746,
+  "by_year": [
+   {
+    "year": 2015,
+    "n": 9
+   },
+   {
+    "year": 2016,
+    "n": 22
+   },
+   {
+    "year": 2017,
+    "n": 1428
+   },
+   {
+    "year": 2018,
+    "n": 8
+   },
+   {
+    "year": 2019,
+    "n": 3
+   },
+   {
+    "year": 2020,
+    "n": 89
+   },
+   {
+    "year": 2021,
+    "n": 10
+   },
+   {
+    "year": 2022,
+    "n": 22356
+   },
+   {
+    "year": 2023,
+    "n": 47
+   },
+   {
+    "year": 2024,
+    "n": 5948
+   }
+  ]
+ },
+ "declarations": {
+  "since": 2000,
+  "n_total": 20,
+  "by_incident_type": {
+   "Flood": 0,
+   "Hurricane": 16,
+   "Severe Storm": 4
+  },
+  "major_only": 13,
+  "latest": [
+   {
+    "id": "DR-4834",
+    "title": "HURRICANE MILTON",
+    "incident_type": "Hurricane",
+    "date": "2024-10-11"
+   },
+   {
+    "id": "EM-3622",
+    "title": "HURRICANE MILTON",
+    "incident_type": "Hurricane",
+    "date": "2024-10-07"
+   },
+   {
+    "id": "DR-4828",
+    "title": "HURRICANE HELENE",
+    "incident_type": "Hurricane",
+    "date": "2024-09-28"
+   },
+   {
+    "id": "DR-4734",
+    "title": "HURRICANE IDALIA",
+    "incident_type": "Hurricane",
+    "date": "2023-08-31"
+   },
+   {
+    "id": "DR-4680",
+    "title": "HURRICANE NICOLE",
+    "incident_type": "Hurricane",
+    "date": "2022-12-13"
+   }
+  ]
+ },
+ "owners_assistance": {
+  "since": 2002,
+  "n_inspected": 93931,
+  "damage_bands": [
+   {
+    "band": "No FEMA-inspected damage",
+    "n": 21476
+   },
+   {
+    "band": "$1-$10,000",
+    "n": 46121
+   },
+   {
+    "band": "$10,001-$20,000",
+    "n": 10797
+   },
+   {
+    "band": "$20,001-$30,000",
+    "n": 4631
+   },
+   {
+    "band": "More than $30,000",
+    "n": 10906
+   }
+  ],
+  "top_disasters": [
+   {
+    "id": "DR-4673",
+    "n": 44305,
+    "title": "HURRICANE IAN",
+    "date": "2022-09-29"
+   },
+   {
+    "id": "DR-4337",
+    "n": 21574,
+    "title": "HURRICANE IRMA",
+    "date": "2017-09-10"
+   },
+   {
+    "id": "DR-1539",
+    "n": 15088,
+    "title": "TROPICAL STORM BONNIE AND HURRICANE CHARLEY",
+    "date": "2004-08-13"
+   },
+   {
+    "id": "DR-1609",
+    "n": 5694,
+    "title": "HURRICANE WILMA",
+    "date": "2005-10-24"
+   },
+   {
+    "id": "DR-4834",
+    "n": 4089,
+    "title": "HURRICANE MILTON",
+    "date": "2024-10-11"
+   }
+  ]
+ },
+ "compare": {
+  "peers": {
+   "family": "counties",
+   "n": 339
+  },
+  "values": {
+   "policies": 76344,
+   "median_premium": 1663,
+   "paid_claims": 29920,
+   "median_paid": 69662,
+   "declarations": 20,
+   "owners_over_30k_share": 0.116
+  },
+  "rank_in_family": {
+   "policies": {
+    "rank": 5,
+    "of": 339
+   },
+   "median_premium": {
+    "rank": 9,
+    "of": 339
+   },
+   "paid_claims": {
+    "rank": 2,
+    "of": 339
+   },
+   "median_paid": {
+    "rank": 14,
+    "of": 339
+   },
+   "declarations": {
+    "rank": 75,
+    "of": 339
+   },
+   "owners_over_30k_share": {
+    "rank": 19,
+    "of": 339
+   }
+  },
+  "national": {
+   "median_premium": 1055,
+   "median_paid": 37248,
+   "owners_over_30k_share": 0.026
+  },
+  "gaps": {
+   "median_premium": {
+    "national": {
+     "ref": 1055,
+     "diff": 608,
+     "rel": 0.576
+    },
+    "state": {
+     "ref": 1002,
+     "diff": 661,
+     "rel": 0.66
+    }
+   },
+   "median_paid": {
+    "national": {
+     "ref": 37248,
+     "diff": 32414,
+     "rel": 0.87
+    },
+    "state": {
+     "ref": 57176,
+     "diff": 12486,
+     "rel": 0.218
+    }
+   },
+   "owners_over_30k_share": {
+    "national": {
+     "ref": 0.026,
+     "diff": 0.09,
+     "rel": 3.462
+    },
+    "state": {
+     "ref": 0.017,
+     "diff": 0.099,
+     "rel": 5.824
+    }
+   },
+   "declarations": {
+    "state_counties": {
+     "ref": 22,
+     "diff": -2,
+     "rel": -0.091
+    }
+   }
+  },
+  "rank_in_state": {
+   "policies": {
+    "rank": 3,
+    "of": 43
+   },
+   "median_premium": {
+    "rank": 4,
+    "of": 43
+   },
+   "paid_claims": {
+    "rank": 1,
+    "of": 43
+   },
+   "median_paid": {
+    "rank": 4,
+    "of": 43
+   },
+   "declarations": {
+    "rank": 34,
+    "of": 43
+   },
+   "owners_over_30k_share": {
+    "rank": 1,
+    "of": 43
+   }
+  },
+  "state": {
+   "median_premium": 1002,
+   "median_paid": 57176,
+   "owners_over_30k_share": 0.017,
+   "counties": 43,
+   "declarations_county_median": 22
+  }
+ },
+ "community_status": {
+  "n": 7,
+  "participating": 7,
+  "crs_classed": 7,
+  "share_classed": 1.0,
+  "best_class": 5,
+  "best_class_communities": [
+   "BONITA SPRINGS, CITY OF",
+   "CAPE CORAL, CITY OF",
+   "FORT MYERS BEACH, TOWN OF",
+   "LEE COUNTY*",
+   "SANIBEL, CITY OF"
+  ],
+  "oldest_current_map": {
+   "date": "2022-11-17",
+   "community": "BONITA SPRINGS, CITY OF"
+  },
+  "sanctioned": 0,
+  "suspended": 0,
+  "withdrawn": 0,
+  "not_participating": 0,
+  "communities": [
+   {
+    "id": "120680",
+    "name": "BONITA SPRINGS, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 5,
+    "sfha_discount_pct": 25,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2022-11-17",
+    "current_map_code": null,
+    "first_firm": "1984-09-19",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "125095",
+    "name": "CAPE CORAL, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 5,
+    "sfha_discount_pct": 25,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2022-11-17",
+    "current_map_code": null,
+    "first_firm": "1981-08-17",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120673",
+    "name": "FORT MYERS BEACH, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 5,
+    "sfha_discount_pct": 25,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2022-11-17",
+    "current_map_code": null,
+    "first_firm": "1984-09-19",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "125124",
+    "name": "LEE COUNTY*",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 5,
+    "sfha_discount_pct": 25,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2022-11-17",
+    "current_map_code": null,
+    "first_firm": "1984-09-19",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120402",
+    "name": "SANIBEL, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 5,
+    "sfha_discount_pct": 25,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2022-11-17",
+    "current_map_code": null,
+    "first_firm": "1979-04-16",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120260",
+    "name": "ESTERO, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 6,
+    "sfha_discount_pct": 20,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2022-11-17",
+    "current_map_code": null,
+    "first_firm": "1984-09-19",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "125106",
+    "name": "FORT MYERS, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 6,
+    "sfha_discount_pct": 20,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2022-11-17",
+    "current_map_code": null,
+    "first_firm": "1979-04-16",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   }
+  ],
+  "multi_county_communities": [],
+  "state_join_share": 0.01
+ }
+}

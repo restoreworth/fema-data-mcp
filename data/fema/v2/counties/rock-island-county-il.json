@@ -1,0 +1,652 @@
+{
+ "id": "17161",
+ "kind": "county",
+ "name": "Rock Island County",
+ "state": "IL",
+ "slug": "rock-island-county-il",
+ "generated_at": "2026-10-12T13:15:44Z",
+ "sources": [
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-11",
+   "filter": "policyEffectiveDate ge '2025-01-01' and lt '2026-01-01', per propertyState (rows downloaded, every occupancy; residential and policyCost > 0 kept locally)"
+  },
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "$inlinecount per year 2019-2025: propertyState eq '<ST>' and occupancyType in (1,2,3,11,12,13,14) [and startswith(censusGeoid,'<county FIPS>')]"
+  },
+  {
+   "dataset": "NfipClaims",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipClaims",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "yearOfLoss eq <year> and amountPaidOnBuildingClaim gt 0 (one request per year)"
+  },
+  {
+   "dataset": "CPI-U, U.S. city average, all items (CUUR0000SA0), annual average",
+   "version": "BLS Public Data API v1",
+   "api": "https://api.bls.gov/publicAPI/v1/timeseries/data/",
+   "as_of": "annual averages 2005-2025",
+   "accessed_at": "2026-10-12",
+   "filter": "period M13"
+  },
+  {
+   "dataset": "DisasterDeclarationsSummaries",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/DisasterDeclarationsSummaries",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows); declarationType DR or EM, incidentType Flood, Hurricane, Severe Storm, Severe Storm(s), declarationDate >= 2000 kept locally"
+  },
+  {
+   "dataset": "HousingAssistanceOwners",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/HousingAssistanceOwners",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows)"
+  },
+  {
+   "dataset": "NfipCommunityStatusBook",
+   "version": "v1",
+   "api": "https://www.fema.gov/api/open/v1/NfipCommunityStatusBook",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "all rows; community -> county on the `county` text field"
+  }
+ ],
+ "notes": [
+  "FEMA field definition (NfipPolicies v3, policyCost): \"Calculated in dollars by adding together calculated premium, reserve fund assessment, federal policy fee, and HFIAA surcharge\"",
+  "FEMA field definition (NfipPolicies v3, totalInsurancePremiumOfThePolicy): \"Total Insurance Premium of the Policy in whole dollars. Negative values indicate a refund.\"; policyCost is used because it is what the policyholder pays; policyCost < totalInsurancePremiumOfThePolicy on 0 of 3117116 kept residential policies.",
+  "Premiums: one row = one policy term effective in 2025 (NFIP only, no private insurance); median and quartiles are Hyndman-Fan type 7, rounded half up to the dollar; a cell (State, zone, zone group, county) is published only when n >= 100.",
+  "Flood zones: ratedFloodZone grouped as A1-A30 -> AE, V1-V30 -> VE, B/C/X -> X, AOB -> AO, AHB -> AH, AR* -> AR; zone D and unknown zones are left out of the zone tables.",
+  "policies_trend: residential policy terms per year counted by the API ($inlinecount), all premiums included (policyCost <= 0 too), so the 2025 count can differ from premiums.n (county: the API count also filters propertyState, premiums.n does not).",
+  "Claims: amounts paid by NFIP on building claims (amountPaidOnBuildingClaim > 0), not repair costs; nominal dollars; median_paid_2024usd deflates each claim by its yearOfLoss with CPI-U annual averages (same series and method as nfip-paid-claims-by-state); NfipClaims asOfDate 2026-09-08.",
+  "Declarations: administrative decisions, not measured damage; scope = Flood, Hurricane, Severe Storm, Severe Storm(s), major disaster (DR) and emergency (EM), declared since 2000, counted once per disaster number.",
+  "Owners assistance: FEMA inspections of owner applicants to the Individuals and Households Program (inspected damage bands, not insurance claims or grants); NFIP and IHP figures measure different populations and are never added.",
+  "This product uses the Federal Emergency Management Agency’s OpenFEMA API, but is not endorsed by FEMA. The Federal Government or FEMA cannot vouch for the data or analyses derived from these data after the data have been retrieved from the Agency's website(s).",
+  "County of a policy = first 5 digits of censusGeoid (block group of the address); county of a claim = countyCode. FEMA: \"the County Code field may not reflect the individual county the property is located\".",
+  "No named flood event on the paid claims.",
+  "Owners assistance: HousingAssistanceOwners has no FIPS field; rows joined on the county text (DDS designatedArea, then Census 2020 name). HA: \"the applicant has the right to choose the county\"."
+ ],
+ "premiums": {
+  "window": "policies effective 2025",
+  "occupancy": "residential (occupancyType 1,2,3,11,12,13,14)",
+  "field": "policyCost",
+  "n": 695,
+  "median": 728,
+  "q1": 551,
+  "q3": 1224,
+  "by_zone_group": [
+   {
+    "group": "SFHA (A, AE, AH, AO, AR, A99, V, VE)",
+    "n": 636,
+    "median": 708,
+    "q1": 549,
+    "q3": 1252
+   },
+   {
+    "group": "Outside SFHA (X, B, C)",
+    "n": 59,
+    "median": null,
+    "q1": null,
+    "q3": null
+   }
+  ],
+  "by_zone": [
+   {
+    "zone": "AE",
+    "n": 597,
+    "median": 709,
+    "q1": 546,
+    "q3": 1306
+   }
+  ],
+  "policies_trend": [
+   {
+    "year": 2019,
+    "n": 920
+   },
+   {
+    "year": 2020,
+    "n": 872
+   },
+   {
+    "year": 2021,
+    "n": 829
+   },
+   {
+    "year": 2022,
+    "n": 783
+   },
+   {
+    "year": 2023,
+    "n": 760
+   },
+   {
+    "year": 2024,
+    "n": 721
+   },
+   {
+    "year": 2025,
+    "n": 695
+   }
+  ]
+ },
+ "claims": {
+  "window": "year of loss 2015-2024",
+  "n_paid": 198,
+  "median_paid": 8324,
+  "q1": 3593,
+  "q3": 16802,
+  "dollars": "nominal",
+  "median_paid_2024usd": 9986,
+  "top_events": [],
+  "dominant_event_share": null,
+  "by_year": [
+   {
+    "year": 2015,
+    "n": 3
+   },
+   {
+    "year": 2016,
+    "n": 4
+   },
+   {
+    "year": 2017,
+    "n": 20
+   },
+   {
+    "year": 2018,
+    "n": 20
+   },
+   {
+    "year": 2019,
+    "n": 114
+   },
+   {
+    "year": 2020,
+    "n": 4
+   },
+   {
+    "year": 2021,
+    "n": 0
+   },
+   {
+    "year": 2022,
+    "n": 0
+   },
+   {
+    "year": 2023,
+    "n": 26
+   },
+   {
+    "year": 2024,
+    "n": 7
+   }
+  ]
+ },
+ "declarations": {
+  "since": 2000,
+  "n_total": 5,
+  "by_incident_type": {
+   "Flood": 3,
+   "Hurricane": 1,
+   "Severe Storm": 1
+  },
+  "major_only": 4,
+  "latest": [
+   {
+    "id": "DR-4461",
+    "title": "SEVERE STORMS AND FLOODING",
+    "incident_type": "Flood",
+    "date": "2019-09-19"
+   },
+   {
+    "id": "DR-4116",
+    "title": "SEVERE STORMS, STRAIGHT-LINE WINDS, AND FLOODING",
+    "incident_type": "Flood",
+    "date": "2013-05-10"
+   },
+   {
+    "id": "DR-1771",
+    "title": "SEVERE STORMS AND FLOODING",
+    "incident_type": "Severe Storm",
+    "date": "2008-06-24"
+   },
+   {
+    "id": "EM-3230",
+    "title": "HURRICANE KATRINA EVACUATION",
+    "incident_type": "Hurricane",
+    "date": "2005-09-07"
+   },
+   {
+    "id": "DR-1368",
+    "title": "FLOODING",
+    "incident_type": "Flood",
+    "date": "2001-05-09"
+   }
+  ]
+ },
+ "owners_assistance": {
+  "since": 2002,
+  "n_inspected": 585,
+  "damage_bands": [
+   {
+    "band": "No FEMA-inspected damage",
+    "n": 50
+   },
+   {
+    "band": "$1-$10,000",
+    "n": 497
+   },
+   {
+    "band": "$10,001-$20,000",
+    "n": 30
+   },
+   {
+    "band": "$20,001-$30,000",
+    "n": 7
+   },
+   {
+    "band": "More than $30,000",
+    "n": 1
+   }
+  ],
+  "top_disasters": [
+   {
+    "id": "DR-1771",
+    "n": 342,
+    "title": "SEVERE STORMS AND FLOODING",
+    "date": "2008-06-24"
+   },
+   {
+    "id": "DR-4116",
+    "n": 243,
+    "title": "SEVERE STORMS, STRAIGHT-LINE WINDS, AND FLOODING",
+    "date": "2013-05-10"
+   }
+  ]
+ },
+ "compare": {
+  "peers": {
+   "family": "counties",
+   "n": 339
+  },
+  "values": {
+   "policies": 695,
+   "median_premium": 728,
+   "paid_claims": 198,
+   "median_paid": 8324,
+   "declarations": 5,
+   "owners_over_30k_share": 0.002
+  },
+  "rank_in_family": {
+   "policies": {
+    "rank": 253,
+    "of": 339
+   },
+   "median_premium": {
+    "rank": 305,
+    "of": 339
+   },
+   "paid_claims": {
+    "rank": 226,
+    "of": 339
+   },
+   "median_paid": {
+    "rank": 308,
+    "of": 339
+   },
+   "declarations": {
+    "rank": 330,
+    "of": 339
+   },
+   "owners_over_30k_share": {
+    "rank": 289,
+    "of": 339
+   }
+  },
+  "national": {
+   "median_premium": 1055,
+   "median_paid": 37248,
+   "owners_over_30k_share": 0.026
+  },
+  "gaps": {
+   "median_premium": {
+    "national": {
+     "ref": 1055,
+     "diff": -327,
+     "rel": -0.31
+    },
+    "state": {
+     "ref": 1110,
+     "diff": -382,
+     "rel": -0.344
+    }
+   },
+   "median_paid": {
+    "national": {
+     "ref": 37248,
+     "diff": -28924,
+     "rel": -0.777
+    },
+    "state": {
+     "ref": 9599,
+     "diff": -1275,
+     "rel": -0.133
+    }
+   },
+   "owners_over_30k_share": {
+    "national": {
+     "ref": 0.026,
+     "diff": -0.024,
+     "rel": -0.923
+    },
+    "state": {
+     "ref": 0.004,
+     "diff": -0.002,
+     "rel": -0.5
+    }
+   },
+   "declarations": {
+    "state_counties": {
+     "ref": 6,
+     "diff": -1,
+     "rel": -0.167
+    }
+   }
+  },
+  "rank_in_state": {
+   "policies": {
+    "rank": 4,
+    "of": 5
+   },
+   "median_premium": {
+    "rank": 5,
+    "of": 5
+   },
+   "paid_claims": {
+    "rank": 4,
+    "of": 5
+   },
+   "median_paid": {
+    "rank": 2,
+    "of": 5
+   },
+   "declarations": {
+    "rank": 4,
+    "of": 5
+   },
+   "owners_over_30k_share": {
+    "rank": 3,
+    "of": 5
+   }
+  },
+  "state": {
+   "median_premium": 1110,
+   "median_paid": 9599,
+   "owners_over_30k_share": 0.004,
+   "counties": 5,
+   "declarations_county_median": 6
+  }
+ },
+ "community_status": {
+  "n": 13,
+  "participating": 13,
+  "crs_classed": 2,
+  "share_classed": 0.154,
+  "best_class": 6,
+  "best_class_communities": [
+   "ROCK ISLAND COUNTY*"
+  ],
+  "oldest_current_map": {
+   "date": "2010-04-05",
+   "community": "ROCK ISLAND COUNTY*"
+  },
+  "sanctioned": 0,
+  "suspended": 0,
+  "withdrawn": 0,
+  "not_participating": 0,
+  "communities": [
+   {
+    "id": "170582",
+    "name": "ROCK ISLAND COUNTY*",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 6,
+    "sfha_discount_pct": 20,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2010-04-05",
+    "current_map_code": null,
+    "first_firm": "1982-08-02",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "170591",
+    "name": "MOLINE, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 8,
+    "sfha_discount_pct": 10,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2010-04-05",
+    "current_map_code": null,
+    "first_firm": "1980-02-01",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "170583",
+    "name": "ANDALUSIA, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2010-04-05",
+    "current_map_code": null,
+    "first_firm": "1982-01-20",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "170584",
+    "name": "CARBON CLIFF, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2010-04-05",
+    "current_map_code": null,
+    "first_firm": "1982-06-01",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "170586",
+    "name": "CORDOVA, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2010-04-05",
+    "current_map_code": null,
+    "first_firm": "1981-12-01",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "170587",
+    "name": "EAST MOLINE, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2010-04-05",
+    "current_map_code": null,
+    "first_firm": "1982-10-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "170588",
+    "name": "HAMPTON, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2010-04-05",
+    "current_map_code": null,
+    "first_firm": "1982-01-06",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "170589",
+    "name": "HILLSDALE, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2010-04-05",
+    "current_map_code": null,
+    "first_firm": "1982-07-19",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "170590",
+    "name": "MILAN, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2010-04-05",
+    "current_map_code": null,
+    "first_firm": "1980-03-18",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "170592",
+    "name": "PORT BYRON, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2010-04-05",
+    "current_map_code": null,
+    "first_firm": "1981-09-02",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "170593",
+    "name": "RAPIDS CITY, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2010-04-05",
+    "current_map_code": null,
+    "first_firm": "1982-01-06",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "175171",
+    "name": "ROCK ISLAND, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2010-04-05",
+    "current_map_code": null,
+    "first_firm": "1972-06-09",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "170595",
+    "name": "SILVIS, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2010-04-05",
+    "current_map_code": null,
+    "first_firm": "2002-10-18",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   }
+  ],
+  "multi_county_communities": [
+   {
+    "id": "170585",
+    "name": "COAL VALLEY, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2011-06-02",
+    "current_map_code": null,
+    "first_firm": "1979-12-04",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null,
+    "counties": "HENRY COUNTY/ROCK ISLAND COUNTY"
+   },
+   {
+    "id": "170883",
+    "name": "REYNOLDS, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2010-04-19",
+    "current_map_code": "M",
+    "first_firm": "2002-10-18",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null,
+    "counties": "MERCER COUNTY/ROCK ISLAND COUNTY"
+   }
+  ],
+  "state_join_share": 0.093
+ }
+}

@@ -1,0 +1,66 @@
+// Build-time only (build.mjs): reads the FEMA files of data/, keeps the fields the
+// tools answer with, and returns the source of dist/api/mcp.js (DATA inlined + mcp/handler.mjs).
+import { readFileSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const here = rel => fileURLToPath(new URL(rel, import.meta.url));
+const json = file => JSON.parse(readFileSync(file, 'utf8'));
+export const NOTICE_RE = /This product uses the Federal Emergency Management Agency[^<]*?not endorsed by FEMA[^<]*/;
+export const STATE_FILE = here('../data/nfip_paid_claims_by_state.json');
+export const FEMA_DIR = here('../data/fema');
+const OFF_TOPIC_NOTE = /^(Premiums|Flood zones|policies_trend|FEMA field definition \(NfipPolicies|County of a policy|This product uses)/;
+
+export function mcpData({ pages = [], origin = 'https://restoreworth.com', noticeHtml = null, v2Dir = process.env.GEN_V2_DATA || join(FEMA_DIR, 'v2') } = {}) {
+  const has = path => (pages.includes(path) ? path : null);
+  const stateFile = json(STATE_FILE);
+  const countyFile = json(join(FEMA_DIR, 'nfip_claims_by_county.json'));
+  const depthFile = json(join(FEMA_DIR, 'flood_damage_by_water_depth.json'));
+  const read = dir => readdirSync(join(v2Dir, dir)).filter(f => f.endsWith('.json')).sort().map(f => json(join(v2Dir, dir, f)));
+  const v2States = read('states');
+  const v2Counties = read('counties');
+  const stateSlug = Object.fromEntries(v2States.map(s => [s.id, s.slug]));
+  // State of a FIPS prefix: the Census county file the county table took its names from (county_names_source), then the data.
+  const fipsStates = {};
+  for (const line of readFileSync(join(FEMA_DIR, '../sources/national_county2020.txt'), 'utf8').split(/\r?\n/).slice(1)) {
+    const [code, fp] = line.split('|');
+    if (/^[A-Z]{2}$/.test(code) && /^[0-9]{2}$/.test(fp)) fipsStates[fp] = code;
+  }
+  for (const r of countyFile.records) fipsStates[r.fips.slice(0, 2)] = r.state;
+  for (const c of v2Counties) fipsStates[c.id.slice(0, 2)] = c.state;
+  const counties = {}, countyPages = {}, v2Sources = new Map();
+  const community = (x, multi) => ({ name: x.name, participating: x.participating, crs_class: x.crs_class, sfha_discount_pct: x.sfha_discount_pct,
+    non_sfha_discount_pct: x.non_sfha_discount_pct, current_map: x.current_map, sanction: x.sanction, ...(multi ? { multi_county: true } : {}) });
+  for (const c of v2Counties) {
+    const page = has(`/flood-data/${stateSlug[c.state]}/${c.slug}/`);
+    if (page) countyPages[c.id] = page;
+    const sources = c.sources.filter(s => s.dataset !== 'NfipPolicies').map(s => ({ dataset: s.dataset, api: s.api, as_of: s.as_of, accessed_at: s.accessed_at }));
+    for (const s of sources) v2Sources.set(JSON.stringify(s), s);
+    const { communities = [], multi_county_communities = [], ...status } = c.community_status || {};
+    const { by_year, ...claims } = c.claims || {};
+    counties[c.id] = { name: c.name, state: c.state, generated_at: c.generated_at, as_of: (sources.find(s => s.dataset === 'NfipClaims') || {}).as_of ?? null,
+      claims, declarations: c.declarations ?? null, owners_assistance: c.owners_assistance ?? null,
+      community_status: c.community_status ? { ...status, communities: [...communities.map(x => community(x)), ...multi_county_communities.map(x => community(x, true))] } : null,
+      notes: c.notes.filter(n => !OFF_TOPIC_NOTE.test(n)), sources };
+  }
+  const notice = (noticeHtml && (noticeHtml.match(NOTICE_RE) || [])[0]) || depthFile.source.fema_notice;
+  const pick = (o, keys) => Object.fromEntries(keys.filter(k => k in o).map(k => [k, o[k]]));
+  return {
+    version: '1.0.0', origin, fema_notice: notice,
+    pages: { nfip_state: has('/nfip-flood-claims-by-state.html'), depth: has('/flood-damage-by-water-depth.html'), county_table: has('/nfip-claims-by-county.html'),
+      states: Object.fromEntries(v2States.map(s => [s.id, has(`/flood-data/${s.slug}/`)]).filter(([, p]) => p)), counties: countyPages },
+    states: v2States.map(s => ({ code: s.id, name: s.name })), fipsStates,
+    stateFile: { title: stateFile.title, source: stateFile.source, method: pick(stateFile.method, ['window', 'min_n_paid']), records: stateFile.records },
+    countyFile: { title: countyFile.title, source: countyFile.source, method: pick(countyFile.method, ['window', 'window_recent', 'min_n_paid', 'fema_county_caveat']), records: countyFile.records },
+    depthFile: { title: depthFile.title, source: depthFile.source, paid_over_damage: depthFile.paid_over_damage, records: depthFile.records,
+      method: pick(depthFile.method, ['window', 'ratio', 'damage_basis', 'depth_rule', 'segments', 'min_n', 'heaping_1_inch']) },
+    v2: { counties, sources: [...v2Sources.values()] }
+  };
+}
+
+export function mcpBundle(options) {
+  const handler = readFileSync(here('./handler.mjs'), 'utf8').replace(/^export \{ createHandler \};\s*$/m, '');
+  return `// Generated by scripts/build.mjs (MCP_PUBLIC=1) from mcp/handler.mjs and FEMA files. Do not edit.\n`
+    + `const DATA = ${JSON.stringify(mcpData(options))};\n${handler}\n`
+    + 'const H = createHandler(DATA);\nexport const POST = H.POST, GET = H.GET, OPTIONS = H.OPTIONS, DELETE = H.DELETE;\n';
+}

@@ -1,0 +1,984 @@
+{
+ "id": "25009",
+ "kind": "county",
+ "name": "Essex County",
+ "state": "MA",
+ "slug": "essex-county-ma",
+ "generated_at": "2026-10-12T13:15:44Z",
+ "sources": [
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-11",
+   "filter": "policyEffectiveDate ge '2025-01-01' and lt '2026-01-01', per propertyState (rows downloaded, every occupancy; residential and policyCost > 0 kept locally)"
+  },
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "$inlinecount per year 2019-2025: propertyState eq '<ST>' and occupancyType in (1,2,3,11,12,13,14) [and startswith(censusGeoid,'<county FIPS>')]"
+  },
+  {
+   "dataset": "NfipClaims",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipClaims",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "yearOfLoss eq <year> and amountPaidOnBuildingClaim gt 0 (one request per year)"
+  },
+  {
+   "dataset": "CPI-U, U.S. city average, all items (CUUR0000SA0), annual average",
+   "version": "BLS Public Data API v1",
+   "api": "https://api.bls.gov/publicAPI/v1/timeseries/data/",
+   "as_of": "annual averages 2005-2025",
+   "accessed_at": "2026-10-12",
+   "filter": "period M13"
+  },
+  {
+   "dataset": "DisasterDeclarationsSummaries",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/DisasterDeclarationsSummaries",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows); declarationType DR or EM, incidentType Flood, Hurricane, Severe Storm, Severe Storm(s), declarationDate >= 2000 kept locally"
+  },
+  {
+   "dataset": "HousingAssistanceOwners",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/HousingAssistanceOwners",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows)"
+  },
+  {
+   "dataset": "NfipCommunityStatusBook",
+   "version": "v1",
+   "api": "https://www.fema.gov/api/open/v1/NfipCommunityStatusBook",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "all rows; community -> county on the `county` text field"
+  }
+ ],
+ "notes": [
+  "FEMA field definition (NfipPolicies v3, policyCost): \"Calculated in dollars by adding together calculated premium, reserve fund assessment, federal policy fee, and HFIAA surcharge\"",
+  "FEMA field definition (NfipPolicies v3, totalInsurancePremiumOfThePolicy): \"Total Insurance Premium of the Policy in whole dollars. Negative values indicate a refund.\"; policyCost is used because it is what the policyholder pays; policyCost < totalInsurancePremiumOfThePolicy on 0 of 3117116 kept residential policies.",
+  "Premiums: one row = one policy term effective in 2025 (NFIP only, no private insurance); median and quartiles are Hyndman-Fan type 7, rounded half up to the dollar; a cell (State, zone, zone group, county) is published only when n >= 100.",
+  "Flood zones: ratedFloodZone grouped as A1-A30 -> AE, V1-V30 -> VE, B/C/X -> X, AOB -> AO, AHB -> AH, AR* -> AR; zone D and unknown zones are left out of the zone tables.",
+  "policies_trend: residential policy terms per year counted by the API ($inlinecount), all premiums included (policyCost <= 0 too), so the 2025 count can differ from premiums.n (county: the API count also filters propertyState, premiums.n does not).",
+  "Claims: amounts paid by NFIP on building claims (amountPaidOnBuildingClaim > 0), not repair costs; nominal dollars; median_paid_2024usd deflates each claim by its yearOfLoss with CPI-U annual averages (same series and method as nfip-paid-claims-by-state); NfipClaims asOfDate 2026-09-08.",
+  "Declarations: administrative decisions, not measured damage; scope = Flood, Hurricane, Severe Storm, Severe Storm(s), major disaster (DR) and emergency (EM), declared since 2000, counted once per disaster number.",
+  "Owners assistance: FEMA inspections of owner applicants to the Individuals and Households Program (inspected damage bands, not insurance claims or grants); NFIP and IHP figures measure different populations and are never added.",
+  "This product uses the Federal Emergency Management Agency’s OpenFEMA API, but is not endorsed by FEMA. The Federal Government or FEMA cannot vouch for the data or analyses derived from these data after the data have been retrieved from the Agency's website(s).",
+  "County of a policy = first 5 digits of censusGeoid (block group of the address); county of a claim = countyCode. FEMA: \"the County Code field may not reflect the individual county the property is located\".",
+  "Dominant event: December Nor'easter = 0.005 of paid claims 2015-2024.",
+  "Owners assistance: HousingAssistanceOwners has no FIPS field; rows joined on the county text (DDS designatedArea, then Census 2020 name). HA: \"the applicant has the right to choose the county\"."
+ ],
+ "premiums": {
+  "window": "policies effective 2025",
+  "occupancy": "residential (occupancyType 1,2,3,11,12,13,14)",
+  "field": "policyCost",
+  "n": 4963,
+  "median": 1423,
+  "q1": 956,
+  "q3": 1868,
+  "by_zone_group": [
+   {
+    "group": "SFHA (A, AE, AH, AO, AR, A99, V, VE)",
+    "n": 3847,
+    "median": 1636,
+    "q1": 1138,
+    "q3": 1999
+   },
+   {
+    "group": "Outside SFHA (X, B, C)",
+    "n": 1116,
+    "median": 894,
+    "q1": 611,
+    "q3": 1198
+   }
+  ],
+  "by_zone": [
+   {
+    "zone": "AE",
+    "n": 2829,
+    "median": 1644,
+    "q1": 1168,
+    "q3": 2173
+   },
+   {
+    "zone": "X",
+    "n": 1116,
+    "median": 894,
+    "q1": 611,
+    "q3": 1198
+   },
+   {
+    "zone": "VE",
+    "n": 756,
+    "median": 1577,
+    "q1": 1119,
+    "q3": 1934
+   },
+   {
+    "zone": "AO",
+    "n": 139,
+    "median": 1745,
+    "q1": 1396,
+    "q3": 1933
+   },
+   {
+    "zone": "A",
+    "n": 123,
+    "median": 974,
+    "q1": 750,
+    "q3": 1290
+   }
+  ],
+  "policies_trend": [
+   {
+    "year": 2019,
+    "n": 6310
+   },
+   {
+    "year": 2020,
+    "n": 6051
+   },
+   {
+    "year": 2021,
+    "n": 5863
+   },
+   {
+    "year": 2022,
+    "n": 5105
+   },
+   {
+    "year": 2023,
+    "n": 4939
+   },
+   {
+    "year": 2024,
+    "n": 4944
+   },
+   {
+    "year": 2025,
+    "n": 4963
+   }
+  ]
+ },
+ "claims": {
+  "window": "year of loss 2015-2024",
+  "n_paid": 595,
+  "median_paid": 15032,
+  "q1": 6867,
+  "q3": 33417,
+  "dollars": "nominal",
+  "median_paid_2024usd": 17114,
+  "top_events": [
+   {
+    "name": "December Nor'easter",
+    "n": 3,
+    "share": 0.005
+   },
+   {
+    "name": "Hurricane Ida",
+    "n": 3,
+    "share": 0.005
+   },
+   {
+    "name": "Hurricane Elsa",
+    "n": 2,
+    "share": 0.003
+   }
+  ],
+  "dominant_event_share": 0.005,
+  "by_year": [
+   {
+    "year": 2015,
+    "n": 7
+   },
+   {
+    "year": 2016,
+    "n": 5
+   },
+   {
+    "year": 2017,
+    "n": 31
+   },
+   {
+    "year": 2018,
+    "n": 334
+   },
+   {
+    "year": 2019,
+    "n": 4
+   },
+   {
+    "year": 2020,
+    "n": 6
+   },
+   {
+    "year": 2021,
+    "n": 26
+   },
+   {
+    "year": 2022,
+    "n": 25
+   },
+   {
+    "year": 2023,
+    "n": 16
+   },
+   {
+    "year": 2024,
+    "n": 141
+   }
+  ]
+ },
+ "declarations": {
+  "since": 2000,
+  "n_total": 16,
+  "by_incident_type": {
+   "Flood": 1,
+   "Hurricane": 5,
+   "Severe Storm": 10
+  },
+  "major_only": 9,
+  "latest": [
+   {
+    "id": "EM-3599",
+    "title": "HURRICANE LEE",
+    "incident_type": "Hurricane",
+    "date": "2023-09-15"
+   },
+   {
+    "id": "DR-4372",
+    "title": "SEVERE WINTER STORM AND FLOODING",
+    "incident_type": "Severe Storm",
+    "date": "2018-06-25"
+   },
+   {
+    "id": "DR-4214",
+    "title": "SEVERE WINTER STORM, SNOWSTORM, AND FLOODING",
+    "incident_type": "Severe Storm",
+    "date": "2015-04-13"
+   },
+   {
+    "id": "DR-4110",
+    "title": "SEVERE WINTER STORM, SNOWSTORM, AND FLOODING",
+    "incident_type": "Severe Storm",
+    "date": "2013-04-19"
+   },
+   {
+    "id": "EM-3350",
+    "title": "HURRICANE SANDY",
+    "incident_type": "Hurricane",
+    "date": "2012-10-28"
+   }
+  ]
+ },
+ "owners_assistance": {
+  "since": 2002,
+  "n_inspected": 10024,
+  "damage_bands": [
+   {
+    "band": "No FEMA-inspected damage",
+    "n": 582
+   },
+   {
+    "band": "$1-$10,000",
+    "n": 9189
+   },
+   {
+    "band": "$10,001-$20,000",
+    "n": 228
+   },
+   {
+    "band": "$20,001-$30,000",
+    "n": 19
+   },
+   {
+    "band": "More than $30,000",
+    "n": 6
+   }
+  ],
+  "top_disasters": [
+   {
+    "id": "DR-1642",
+    "n": 5806,
+    "title": "SEVERE STORMS AND FLOODING",
+    "date": "2006-05-25"
+   },
+   {
+    "id": "DR-1895",
+    "n": 3226,
+    "title": "SEVERE STORMS AND  FLOODING",
+    "date": "2010-03-29"
+   },
+   {
+    "id": "DR-1512",
+    "n": 992,
+    "title": "FLOODING",
+    "date": "2004-04-21"
+   }
+  ]
+ },
+ "compare": {
+  "peers": {
+   "family": "counties",
+   "n": 339
+  },
+  "values": {
+   "policies": 4963,
+   "median_premium": 1423,
+   "paid_claims": 595,
+   "median_paid": 15032,
+   "declarations": 16,
+   "owners_over_30k_share": 0.001
+  },
+  "rank_in_family": {
+   "policies": {
+    "rank": 99,
+    "of": 339
+   },
+   "median_premium": {
+    "rank": 27,
+    "of": 339
+   },
+   "paid_claims": {
+    "rank": 103,
+    "of": 339
+   },
+   "median_paid": {
+    "rank": 217,
+    "of": 339
+   },
+   "declarations": {
+    "rank": 127,
+    "of": 339
+   },
+   "owners_over_30k_share": {
+    "rank": 304,
+    "of": 339
+   }
+  },
+  "national": {
+   "median_premium": 1055,
+   "median_paid": 37248,
+   "owners_over_30k_share": 0.026
+  },
+  "gaps": {
+   "median_premium": {
+    "national": {
+     "ref": 1055,
+     "diff": 368,
+     "rel": 0.349
+    },
+    "state": {
+     "ref": 1409,
+     "diff": 14,
+     "rel": 0.01
+    }
+   },
+   "median_paid": {
+    "national": {
+     "ref": 37248,
+     "diff": -22216,
+     "rel": -0.596
+    },
+    "state": {
+     "ref": 12611,
+     "diff": 2421,
+     "rel": 0.192
+    }
+   },
+   "owners_over_30k_share": {
+    "national": {
+     "ref": 0.026,
+     "diff": -0.025,
+     "rel": -0.962
+    },
+    "state": {
+     "ref": 0.002,
+     "diff": -0.001,
+     "rel": -0.5
+    }
+   },
+   "declarations": {
+    "state_counties": {
+     "ref": 14,
+     "diff": 2,
+     "rel": 0.143
+    }
+   }
+  },
+  "rank_in_state": {
+   "policies": {
+    "rank": 2,
+    "of": 5
+   },
+   "median_premium": {
+    "rank": 3,
+    "of": 5
+   },
+   "paid_claims": {
+    "rank": 2,
+    "of": 5
+   },
+   "median_paid": {
+    "rank": 1,
+    "of": 5
+   },
+   "declarations": {
+    "rank": 1,
+    "of": 5
+   },
+   "owners_over_30k_share": {
+    "rank": 1,
+    "of": 5
+   }
+  },
+  "state": {
+   "median_premium": 1409,
+   "median_paid": 12611,
+   "owners_over_30k_share": 0.002,
+   "counties": 5,
+   "declarations_county_median": 14
+  }
+ },
+ "community_status": {
+  "n": 34,
+  "participating": 34,
+  "crs_classed": 3,
+  "share_classed": 0.088,
+  "best_class": 8,
+  "best_class_communities": [
+   "SALISBURY, TOWN OF"
+  ],
+  "oldest_current_map": {
+   "date": "2012-07-03",
+   "community": "NORTH ANDOVER, TOWN OF"
+  },
+  "sanctioned": 0,
+  "suspended": 0,
+  "withdrawn": 0,
+  "not_participating": 0,
+  "communities": [
+   {
+    "id": "250103",
+    "name": "SALISBURY, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 8,
+    "sfha_discount_pct": 10,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2025-07-08",
+    "current_map_code": null,
+    "first_firm": "1977-05-02",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "250085",
+    "name": "HAVERHILL, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 9,
+    "sfha_discount_pct": 5,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2025-07-08",
+    "current_map_code": null,
+    "first_firm": "1983-02-16",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "250082",
+    "name": "GLOUCESTER, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 10,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": 0,
+    "current_map": "2025-07-08",
+    "current_map_code": null,
+    "first_firm": "1986-01-17",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "250075",
+    "name": "AMESBURY, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2025-07-08",
+    "current_map_code": null,
+    "first_firm": "1980-06-18",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "250076",
+    "name": "ANDOVER, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2025-07-08",
+    "current_map_code": null,
+    "first_firm": "1978-08-01",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "250077",
+    "name": "BEVERLY, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2025-07-08",
+    "current_map_code": null,
+    "first_firm": "1986-03-18",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "250078",
+    "name": "BOXFORD, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2025-07-08",
+    "current_map_code": null,
+    "first_firm": "1991-06-03",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "250079",
+    "name": "DANVERS, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2025-07-08",
+    "current_map_code": null,
+    "first_firm": "1980-07-02",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "250080",
+    "name": "ESSEX, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2025-07-08",
+    "current_map_code": null,
+    "first_firm": "1986-07-17",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "250081",
+    "name": "GEORGETOWN, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2025-07-08",
+    "current_map_code": null,
+    "first_firm": "1980-06-04",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "250083",
+    "name": "GROVELAND, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2025-07-08",
+    "current_map_code": null,
+    "first_firm": "1980-10-01",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "250084",
+    "name": "HAMILTON, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2025-07-08",
+    "current_map_code": null,
+    "first_firm": "1990-06-04",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "250086",
+    "name": "IPSWICH, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2025-07-08",
+    "current_map_code": null,
+    "first_firm": "1985-08-05",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "250087",
+    "name": "LAWRENCE, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2025-07-08",
+    "current_map_code": null,
+    "first_firm": "1982-08-02",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "250088",
+    "name": "LYNN, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2025-07-08",
+    "current_map_code": null,
+    "first_firm": "1985-02-01",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "250089",
+    "name": "LYNNFIELD, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2025-07-08",
+    "current_map_code": null,
+    "first_firm": "1980-02-01",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "250090",
+    "name": "MANCHESTER-BY-THE-SEA, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2025-07-08",
+    "current_map_code": null,
+    "first_firm": "1986-09-04",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "250091",
+    "name": "MARBLEHEAD, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2025-07-08",
+    "current_map_code": null,
+    "first_firm": "1985-07-03",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "250092",
+    "name": "MERRIMAC, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2025-07-08",
+    "current_map_code": null,
+    "first_firm": "1982-07-05",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "250093",
+    "name": "METHUEN, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2025-07-08",
+    "current_map_code": null,
+    "first_firm": "1980-07-02",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "250094",
+    "name": "MIDDLETON, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2025-07-08",
+    "current_map_code": null,
+    "first_firm": "1980-11-05",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "250095",
+    "name": "NAHANT, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2014-07-16",
+    "current_map_code": null,
+    "first_firm": "1976-07-19",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "250096",
+    "name": "NEWBURY, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2025-07-08",
+    "current_map_code": null,
+    "first_firm": "1977-03-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "250097",
+    "name": "NEWBURYPORT, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2025-07-08",
+    "current_map_code": null,
+    "first_firm": "1978-02-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "250098",
+    "name": "NORTH ANDOVER, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2012-07-03",
+    "current_map_code": null,
+    "first_firm": "1983-06-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "250099",
+    "name": "PEABODY, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2025-07-08",
+    "current_map_code": null,
+    "first_firm": "1980-05-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "250100",
+    "name": "ROCKPORT, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2025-07-08",
+    "current_map_code": null,
+    "first_firm": "1985-06-19",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "250101",
+    "name": "ROWLEY, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2025-07-08",
+    "current_map_code": null,
+    "first_firm": "1986-08-05",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "250102",
+    "name": "SALEM, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2025-07-08",
+    "current_map_code": null,
+    "first_firm": "1977-03-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "250104",
+    "name": "SAUGUS, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2025-07-08",
+    "current_map_code": null,
+    "first_firm": "1983-01-19",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "250105",
+    "name": "SWAMPSCOTT, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2025-07-08",
+    "current_map_code": null,
+    "first_firm": "1976-09-03",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "250106",
+    "name": "TOPSFIELD, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2025-07-08",
+    "current_map_code": null,
+    "first_firm": "1980-06-04",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "250107",
+    "name": "WENHAM, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2025-07-08",
+    "current_map_code": null,
+    "first_firm": "1989-06-19",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "250108",
+    "name": "WEST NEWBURY, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2025-07-08",
+    "current_map_code": null,
+    "first_firm": "1979-06-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   }
+  ],
+  "multi_county_communities": [],
+  "state_join_share": 0.0
+ }
+}

@@ -1,0 +1,568 @@
+{
+ "id": "12061",
+ "kind": "county",
+ "name": "Indian River County",
+ "state": "FL",
+ "slug": "indian-river-county-fl",
+ "generated_at": "2026-10-12T13:15:44Z",
+ "sources": [
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-11",
+   "filter": "policyEffectiveDate ge '2025-01-01' and lt '2026-01-01', per propertyState (rows downloaded, every occupancy; residential and policyCost > 0 kept locally)"
+  },
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "$inlinecount per year 2019-2025: propertyState eq '<ST>' and occupancyType in (1,2,3,11,12,13,14) [and startswith(censusGeoid,'<county FIPS>')]"
+  },
+  {
+   "dataset": "NfipClaims",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipClaims",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "yearOfLoss eq <year> and amountPaidOnBuildingClaim gt 0 (one request per year)"
+  },
+  {
+   "dataset": "CPI-U, U.S. city average, all items (CUUR0000SA0), annual average",
+   "version": "BLS Public Data API v1",
+   "api": "https://api.bls.gov/publicAPI/v1/timeseries/data/",
+   "as_of": "annual averages 2005-2025",
+   "accessed_at": "2026-10-12",
+   "filter": "period M13"
+  },
+  {
+   "dataset": "DisasterDeclarationsSummaries",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/DisasterDeclarationsSummaries",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows); declarationType DR or EM, incidentType Flood, Hurricane, Severe Storm, Severe Storm(s), declarationDate >= 2000 kept locally"
+  },
+  {
+   "dataset": "HousingAssistanceOwners",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/HousingAssistanceOwners",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows)"
+  },
+  {
+   "dataset": "NfipCommunityStatusBook",
+   "version": "v1",
+   "api": "https://www.fema.gov/api/open/v1/NfipCommunityStatusBook",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "all rows; community -> county on the `county` text field"
+  }
+ ],
+ "notes": [
+  "FEMA field definition (NfipPolicies v3, policyCost): \"Calculated in dollars by adding together calculated premium, reserve fund assessment, federal policy fee, and HFIAA surcharge\"",
+  "FEMA field definition (NfipPolicies v3, totalInsurancePremiumOfThePolicy): \"Total Insurance Premium of the Policy in whole dollars. Negative values indicate a refund.\"; policyCost is used because it is what the policyholder pays; policyCost < totalInsurancePremiumOfThePolicy on 0 of 3117116 kept residential policies.",
+  "Premiums: one row = one policy term effective in 2025 (NFIP only, no private insurance); median and quartiles are Hyndman-Fan type 7, rounded half up to the dollar; a cell (State, zone, zone group, county) is published only when n >= 100.",
+  "Flood zones: ratedFloodZone grouped as A1-A30 -> AE, V1-V30 -> VE, B/C/X -> X, AOB -> AO, AHB -> AH, AR* -> AR; zone D and unknown zones are left out of the zone tables.",
+  "policies_trend: residential policy terms per year counted by the API ($inlinecount), all premiums included (policyCost <= 0 too), so the 2025 count can differ from premiums.n (county: the API count also filters propertyState, premiums.n does not).",
+  "Claims: amounts paid by NFIP on building claims (amountPaidOnBuildingClaim > 0), not repair costs; nominal dollars; median_paid_2024usd deflates each claim by its yearOfLoss with CPI-U annual averages (same series and method as nfip-paid-claims-by-state); NfipClaims asOfDate 2026-09-08.",
+  "Declarations: administrative decisions, not measured damage; scope = Flood, Hurricane, Severe Storm, Severe Storm(s), major disaster (DR) and emergency (EM), declared since 2000, counted once per disaster number.",
+  "Owners assistance: FEMA inspections of owner applicants to the Individuals and Households Program (inspected damage bands, not insurance claims or grants); NFIP and IHP figures measure different populations and are never added.",
+  "This product uses the Federal Emergency Management Agency’s OpenFEMA API, but is not endorsed by FEMA. The Federal Government or FEMA cannot vouch for the data or analyses derived from these data after the data have been retrieved from the Agency's website(s).",
+  "County of a policy = first 5 digits of censusGeoid (block group of the address); county of a claim = countyCode. FEMA: \"the County Code field may not reflect the individual county the property is located\".",
+  "Dominant event: Hurricane Irma = 0.35 of paid claims 2015-2024.",
+  "Owners assistance: HousingAssistanceOwners has no FIPS field; rows joined on the county text (DDS designatedArea, then Census 2020 name). HA: \"the applicant has the right to choose the county\"."
+ ],
+ "premiums": {
+  "window": "policies effective 2025",
+  "occupancy": "residential (occupancyType 1,2,3,11,12,13,14)",
+  "field": "policyCost",
+  "n": 11757,
+  "median": 994,
+  "q1": 670,
+  "q3": 1307,
+  "by_zone_group": [
+   {
+    "group": "SFHA (A, AE, AH, AO, AR, A99, V, VE)",
+    "n": 4726,
+    "median": 924,
+    "q1": 654,
+    "q3": 1838
+   },
+   {
+    "group": "Outside SFHA (X, B, C)",
+    "n": 7031,
+    "median": 1050,
+    "q1": 684,
+    "q3": 1086
+   }
+  ],
+  "by_zone": [
+   {
+    "zone": "X",
+    "n": 7031,
+    "median": 1050,
+    "q1": 684,
+    "q3": 1086
+   },
+   {
+    "zone": "AE",
+    "n": 4281,
+    "median": 965,
+    "q1": 661,
+    "q3": 1906
+   },
+   {
+    "zone": "A",
+    "n": 327,
+    "median": 635,
+    "q1": 523,
+    "q3": 794
+   }
+  ],
+  "policies_trend": [
+   {
+    "year": 2019,
+    "n": 16417
+   },
+   {
+    "year": 2020,
+    "n": 16514
+   },
+   {
+    "year": 2021,
+    "n": 15918
+   },
+   {
+    "year": 2022,
+    "n": 13191
+   },
+   {
+    "year": 2023,
+    "n": 12182
+   },
+   {
+    "year": 2024,
+    "n": 11899
+   },
+   {
+    "year": 2025,
+    "n": 11757
+   }
+  ]
+ },
+ "claims": {
+  "window": "year of loss 2015-2024",
+  "n_paid": 214,
+  "median_paid": 31019,
+  "q1": 12156,
+  "q3": 62963,
+  "dollars": "nominal",
+  "median_paid_2024usd": 38532,
+  "top_events": [
+   {
+    "name": "Hurricane Irma",
+    "n": 75,
+    "share": 0.35
+   },
+   {
+    "name": "Hurricane Milton",
+    "n": 53,
+    "share": 0.248
+   },
+   {
+    "name": "Hurricane Matthew",
+    "n": 31,
+    "share": 0.145
+   },
+   {
+    "name": "Hurricane Nicole",
+    "n": 3,
+    "share": 0.014
+   }
+  ],
+  "dominant_event_share": 0.35,
+  "by_year": [
+   {
+    "year": 2015,
+    "n": 3
+   },
+   {
+    "year": 2016,
+    "n": 70
+   },
+   {
+    "year": 2017,
+    "n": 79
+   },
+   {
+    "year": 2018,
+    "n": 0
+   },
+   {
+    "year": 2019,
+    "n": 0
+   },
+   {
+    "year": 2020,
+    "n": 1
+   },
+   {
+    "year": 2021,
+    "n": 0
+   },
+   {
+    "year": 2022,
+    "n": 5
+   },
+   {
+    "year": 2023,
+    "n": 2
+   },
+   {
+    "year": 2024,
+    "n": 54
+   }
+  ]
+ },
+ "declarations": {
+  "since": 2000,
+  "n_total": 19,
+  "by_incident_type": {
+   "Flood": 0,
+   "Hurricane": 18,
+   "Severe Storm": 1
+  },
+  "major_only": 11,
+  "latest": [
+   {
+    "id": "DR-4834",
+    "title": "HURRICANE MILTON",
+    "incident_type": "Hurricane",
+    "date": "2024-10-11"
+   },
+   {
+    "id": "EM-3622",
+    "title": "HURRICANE MILTON",
+    "incident_type": "Hurricane",
+    "date": "2024-10-07"
+   },
+   {
+    "id": "DR-4680",
+    "title": "HURRICANE NICOLE",
+    "incident_type": "Hurricane",
+    "date": "2022-12-13"
+   },
+   {
+    "id": "DR-4673",
+    "title": "HURRICANE IAN",
+    "incident_type": "Hurricane",
+    "date": "2022-09-29"
+   },
+   {
+    "id": "EM-3584",
+    "title": "TROPICAL STORM IAN",
+    "incident_type": "Hurricane",
+    "date": "2022-09-24"
+   }
+  ]
+ },
+ "owners_assistance": {
+  "since": 2002,
+  "n_inspected": 26439,
+  "damage_bands": [
+   {
+    "band": "No FEMA-inspected damage",
+    "n": 3203
+   },
+   {
+    "band": "$1-$10,000",
+    "n": 21679
+   },
+   {
+    "band": "$10,001-$20,000",
+    "n": 997
+   },
+   {
+    "band": "$20,001-$30,000",
+    "n": 171
+   },
+   {
+    "band": "More than $30,000",
+    "n": 389
+   }
+  ],
+  "top_disasters": [
+   {
+    "id": "DR-1561",
+    "n": 11223,
+    "title": "HURRICANE JEANNE",
+    "date": "2004-09-26"
+   },
+   {
+    "id": "DR-1545",
+    "n": 11130,
+    "title": "HURRICANE FRANCES",
+    "date": "2004-09-04"
+   },
+   {
+    "id": "DR-4337",
+    "n": 2415,
+    "title": "HURRICANE IRMA",
+    "date": "2017-09-10"
+   },
+   {
+    "id": "DR-4834",
+    "n": 817,
+    "title": "HURRICANE MILTON",
+    "date": "2024-10-11"
+   },
+   {
+    "id": "DR-1609",
+    "n": 501,
+    "title": "HURRICANE WILMA",
+    "date": "2005-10-24"
+   }
+  ]
+ },
+ "compare": {
+  "peers": {
+   "family": "counties",
+   "n": 339
+  },
+  "values": {
+   "policies": 11757,
+   "median_premium": 994,
+   "paid_claims": 214,
+   "median_paid": 31019,
+   "declarations": 19,
+   "owners_over_30k_share": 0.015
+  },
+  "rank_in_family": {
+   "policies": {
+    "rank": 50,
+    "of": 339
+   },
+   "median_premium": {
+    "rank": 206,
+    "of": 339
+   },
+   "paid_claims": {
+    "rank": 218,
+    "of": 339
+   },
+   "median_paid": {
+    "rank": 85,
+    "of": 339
+   },
+   "declarations": {
+    "rank": 85,
+    "of": 339
+   },
+   "owners_over_30k_share": {
+    "rank": 161,
+    "of": 339
+   }
+  },
+  "national": {
+   "median_premium": 1055,
+   "median_paid": 37248,
+   "owners_over_30k_share": 0.026
+  },
+  "gaps": {
+   "median_premium": {
+    "national": {
+     "ref": 1055,
+     "diff": -61,
+     "rel": -0.058
+    },
+    "state": {
+     "ref": 1002,
+     "diff": -8,
+     "rel": -0.008
+    }
+   },
+   "median_paid": {
+    "national": {
+     "ref": 37248,
+     "diff": -6229,
+     "rel": -0.167
+    },
+    "state": {
+     "ref": 57176,
+     "diff": -26157,
+     "rel": -0.457
+    }
+   },
+   "owners_over_30k_share": {
+    "national": {
+     "ref": 0.026,
+     "diff": -0.011,
+     "rel": -0.423
+    },
+    "state": {
+     "ref": 0.017,
+     "diff": -0.002,
+     "rel": -0.118
+    }
+   },
+   "declarations": {
+    "state_counties": {
+     "ref": 22,
+     "diff": -3,
+     "rel": -0.136
+    }
+   }
+  },
+  "rank_in_state": {
+   "policies": {
+    "rank": 19,
+    "of": 43
+   },
+   "median_premium": {
+    "rank": 23,
+    "of": 43
+   },
+   "paid_claims": {
+    "rank": 38,
+    "of": 43
+   },
+   "median_paid": {
+    "rank": 24,
+    "of": 43
+   },
+   "declarations": {
+    "rank": 40,
+    "of": 43
+   },
+   "owners_over_30k_share": {
+    "rank": 19,
+    "of": 43
+   }
+  },
+  "state": {
+   "median_premium": 1002,
+   "median_paid": 57176,
+   "owners_over_30k_share": 0.017,
+   "counties": 43,
+   "declarations_county_median": 22
+  }
+ },
+ "community_status": {
+  "n": 6,
+  "participating": 6,
+  "crs_classed": 5,
+  "share_classed": 0.833,
+  "best_class": 5,
+  "best_class_communities": [
+   "INDIAN RIVER COUNTY *",
+   "INDIAN RIVER SHORES, TOWN OF"
+  ],
+  "oldest_current_map": {
+   "date": "2023-01-26",
+   "community": "INDIAN RIVER COUNTY *"
+  },
+  "sanctioned": 0,
+  "suspended": 0,
+  "withdrawn": 0,
+  "not_participating": 0,
+  "communities": [
+   {
+    "id": "120119",
+    "name": "INDIAN RIVER COUNTY *",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 5,
+    "sfha_discount_pct": 25,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2023-01-26",
+    "current_map_code": null,
+    "first_firm": "1978-07-03",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120121",
+    "name": "INDIAN RIVER SHORES, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 5,
+    "sfha_discount_pct": 25,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2023-01-26",
+    "current_map_code": null,
+    "first_firm": "1979-09-05",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120123",
+    "name": "SEBASTIAN, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 6,
+    "sfha_discount_pct": 20,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2023-01-26",
+    "current_map_code": null,
+    "first_firm": "1980-04-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120124",
+    "name": "VERO BEACH, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 6,
+    "sfha_discount_pct": 20,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2023-01-26",
+    "current_map_code": null,
+    "first_firm": "1977-09-30",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120120",
+    "name": "FELLSMERE, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 7,
+    "sfha_discount_pct": 15,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2023-01-26",
+    "current_map_code": null,
+    "first_firm": "1989-05-04",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120122",
+    "name": "ORCHID, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2023-01-26",
+    "current_map_code": null,
+    "first_firm": "1980-04-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   }
+  ],
+  "multi_county_communities": [],
+  "state_join_share": 0.01
+ }
+}

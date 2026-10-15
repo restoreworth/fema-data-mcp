@@ -1,0 +1,588 @@
+{
+ "id": "40027",
+ "kind": "county",
+ "name": "Cleveland County",
+ "state": "OK",
+ "slug": "cleveland-county-ok",
+ "generated_at": "2026-10-12T13:15:44Z",
+ "sources": [
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-11",
+   "filter": "policyEffectiveDate ge '2025-01-01' and lt '2026-01-01', per propertyState (rows downloaded, every occupancy; residential and policyCost > 0 kept locally)"
+  },
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "$inlinecount per year 2019-2025: propertyState eq '<ST>' and occupancyType in (1,2,3,11,12,13,14) [and startswith(censusGeoid,'<county FIPS>')]"
+  },
+  {
+   "dataset": "NfipClaims",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipClaims",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "yearOfLoss eq <year> and amountPaidOnBuildingClaim gt 0 (one request per year)"
+  },
+  {
+   "dataset": "CPI-U, U.S. city average, all items (CUUR0000SA0), annual average",
+   "version": "BLS Public Data API v1",
+   "api": "https://api.bls.gov/publicAPI/v1/timeseries/data/",
+   "as_of": "annual averages 2005-2025",
+   "accessed_at": "2026-10-12",
+   "filter": "period M13"
+  },
+  {
+   "dataset": "DisasterDeclarationsSummaries",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/DisasterDeclarationsSummaries",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows); declarationType DR or EM, incidentType Flood, Hurricane, Severe Storm, Severe Storm(s), declarationDate >= 2000 kept locally"
+  },
+  {
+   "dataset": "HousingAssistanceOwners",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/HousingAssistanceOwners",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows)"
+  },
+  {
+   "dataset": "NfipCommunityStatusBook",
+   "version": "v1",
+   "api": "https://www.fema.gov/api/open/v1/NfipCommunityStatusBook",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "all rows; community -> county on the `county` text field"
+  }
+ ],
+ "notes": [
+  "FEMA field definition (NfipPolicies v3, policyCost): \"Calculated in dollars by adding together calculated premium, reserve fund assessment, federal policy fee, and HFIAA surcharge\"",
+  "FEMA field definition (NfipPolicies v3, totalInsurancePremiumOfThePolicy): \"Total Insurance Premium of the Policy in whole dollars. Negative values indicate a refund.\"; policyCost is used because it is what the policyholder pays; policyCost < totalInsurancePremiumOfThePolicy on 0 of 3117116 kept residential policies.",
+  "Premiums: one row = one policy term effective in 2025 (NFIP only, no private insurance); median and quartiles are Hyndman-Fan type 7, rounded half up to the dollar; a cell (State, zone, zone group, county) is published only when n >= 100.",
+  "Flood zones: ratedFloodZone grouped as A1-A30 -> AE, V1-V30 -> VE, B/C/X -> X, AOB -> AO, AHB -> AH, AR* -> AR; zone D and unknown zones are left out of the zone tables.",
+  "policies_trend: residential policy terms per year counted by the API ($inlinecount), all premiums included (policyCost <= 0 too), so the 2025 count can differ from premiums.n (county: the API count also filters propertyState, premiums.n does not).",
+  "Claims: amounts paid by NFIP on building claims (amountPaidOnBuildingClaim > 0), not repair costs; nominal dollars; median_paid_2024usd deflates each claim by its yearOfLoss with CPI-U annual averages (same series and method as nfip-paid-claims-by-state); NfipClaims asOfDate 2026-09-08.",
+  "Declarations: administrative decisions, not measured damage; scope = Flood, Hurricane, Severe Storm, Severe Storm(s), major disaster (DR) and emergency (EM), declared since 2000, counted once per disaster number.",
+  "Owners assistance: FEMA inspections of owner applicants to the Individuals and Households Program (inspected damage bands, not insurance claims or grants); NFIP and IHP figures measure different populations and are never added.",
+  "This product uses the Federal Emergency Management Agency’s OpenFEMA API, but is not endorsed by FEMA. The Federal Government or FEMA cannot vouch for the data or analyses derived from these data after the data have been retrieved from the Agency's website(s).",
+  "County of a policy = first 5 digits of censusGeoid (block group of the address); county of a claim = countyCode. FEMA: \"the County Code field may not reflect the individual county the property is located\".",
+  "Dominant event: Early summer storms = 0.3 of paid claims 2015-2024.",
+  "Owners assistance: HousingAssistanceOwners has no FIPS field; rows joined on the county text (DDS designatedArea, then Census 2020 name). HA: \"the applicant has the right to choose the county\"."
+ ],
+ "premiums": {
+  "window": "policies effective 2025",
+  "occupancy": "residential (occupancyType 1,2,3,11,12,13,14)",
+  "field": "policyCost",
+  "n": 661,
+  "median": 907,
+  "q1": 667,
+  "q3": 1103,
+  "by_zone_group": [
+   {
+    "group": "SFHA (A, AE, AH, AO, AR, A99, V, VE)",
+    "n": 296,
+    "median": 1008,
+    "q1": 781,
+    "q3": 1312
+   },
+   {
+    "group": "Outside SFHA (X, B, C)",
+    "n": 365,
+    "median": 786,
+    "q1": 588,
+    "q3": 1081
+   }
+  ],
+  "by_zone": [
+   {
+    "zone": "X",
+    "n": 365,
+    "median": 786,
+    "q1": 588,
+    "q3": 1081
+   },
+   {
+    "zone": "AE",
+    "n": 265,
+    "median": 992,
+    "q1": 777,
+    "q3": 1292
+   }
+  ],
+  "policies_trend": [
+   {
+    "year": 2019,
+    "n": 951
+   },
+   {
+    "year": 2020,
+    "n": 883
+   },
+   {
+    "year": 2021,
+    "n": 878
+   },
+   {
+    "year": 2022,
+    "n": 778
+   },
+   {
+    "year": 2023,
+    "n": 703
+   },
+   {
+    "year": 2024,
+    "n": 688
+   },
+   {
+    "year": 2025,
+    "n": 661
+   }
+  ]
+ },
+ "claims": {
+  "window": "year of loss 2015-2024",
+  "n_paid": 100,
+  "median_paid": 16653,
+  "q1": 5246,
+  "q3": 31205,
+  "dollars": "nominal",
+  "median_paid_2024usd": 19515,
+  "top_events": [
+   {
+    "name": "Early summer storms",
+    "n": 30,
+    "share": 0.3
+   },
+   {
+    "name": "Early winter storms",
+    "n": 2,
+    "share": 0.02
+   },
+   {
+    "name": "Tropical Storm Bill",
+    "n": 1,
+    "share": 0.01
+   }
+  ],
+  "dominant_event_share": 0.3,
+  "by_year": [
+   {
+    "year": 2015,
+    "n": 74
+   },
+   {
+    "year": 2016,
+    "n": 4
+   },
+   {
+    "year": 2017,
+    "n": 3
+   },
+   {
+    "year": 2018,
+    "n": 3
+   },
+   {
+    "year": 2019,
+    "n": 3
+   },
+   {
+    "year": 2020,
+    "n": 1
+   },
+   {
+    "year": 2021,
+    "n": 2
+   },
+   {
+    "year": 2022,
+    "n": 4
+   },
+   {
+    "year": 2023,
+    "n": 1
+   },
+   {
+    "year": 2024,
+    "n": 5
+   }
+  ]
+ },
+ "declarations": {
+  "since": 2000,
+  "n_total": 11,
+  "by_incident_type": {
+   "Flood": 0,
+   "Hurricane": 1,
+   "Severe Storm": 10
+  },
+  "major_only": 8,
+  "latest": [
+   {
+    "id": "DR-4950",
+    "title": "SEVERE STORM AND STRAIGHT-LINE WINDS",
+    "incident_type": "Severe Storm",
+    "date": "2026-10-07"
+   },
+   {
+    "id": "DR-4222",
+    "title": "SEVERE STORMS, TORNADOES, STRAIGHT-LINE WINDS, AND FLOODING",
+    "incident_type": "Severe Storm",
+    "date": "2015-05-26"
+   },
+   {
+    "id": "EM-3316",
+    "title": "SEVERE WINTER STORM",
+    "incident_type": "Severe Storm",
+    "date": "2011-02-02"
+   },
+   {
+    "id": "DR-1917",
+    "title": "SEVERE STORMS, TORNADOES, AND STRAIGHT-LINE WINDS",
+    "incident_type": "Severe Storm",
+    "date": "2010-05-24"
+   },
+   {
+    "id": "DR-1876",
+    "title": "SEVERE WINTER STORM",
+    "incident_type": "Severe Storm",
+    "date": "2010-02-25"
+   }
+  ]
+ },
+ "owners_assistance": {
+  "since": 2002,
+  "n_inspected": 4499,
+  "damage_bands": [
+   {
+    "band": "No FEMA-inspected damage",
+    "n": 650
+   },
+   {
+    "band": "$1-$10,000",
+    "n": 3309
+   },
+   {
+    "band": "$10,001-$20,000",
+    "n": 160
+   },
+   {
+    "band": "$20,001-$30,000",
+    "n": 46
+   },
+   {
+    "band": "More than $30,000",
+    "n": 334
+   }
+  ],
+  "top_disasters": [
+   {
+    "id": "DR-4117",
+    "n": 1749,
+    "title": "SEVERE STORMS, TORNADOES, AND FLOODING",
+    "date": "2013-05-20"
+   },
+   {
+    "id": "DR-4222",
+    "n": 1607,
+    "title": "SEVERE STORMS, TORNADOES, STRAIGHT-LINE WINDS, AND FLOODING",
+    "date": "2015-05-26"
+   },
+   {
+    "id": "DR-1917",
+    "n": 320,
+    "title": "SEVERE STORMS, TORNADOES, AND STRAIGHT-LINE WINDS",
+    "date": "2010-05-24"
+   },
+   {
+    "id": "DR-1712",
+    "n": 256,
+    "title": "SEVERE STORMS, FLOODING, AND TORNADOES",
+    "date": "2007-07-07"
+   },
+   {
+    "id": "DR-1718",
+    "n": 142,
+    "title": "SEVERE STORMS, TORNADOES, AND FLOODING",
+    "date": "2007-08-24"
+   }
+  ]
+ },
+ "compare": {
+  "peers": {
+   "family": "counties",
+   "n": 339
+  },
+  "values": {
+   "policies": 661,
+   "median_premium": 907,
+   "paid_claims": 100,
+   "median_paid": 16653,
+   "declarations": 11,
+   "owners_over_30k_share": 0.074
+  },
+  "rank_in_family": {
+   "policies": {
+    "rank": 259,
+    "of": 339
+   },
+   "median_premium": {
+    "rank": 249,
+    "of": 339
+   },
+   "paid_claims": {
+    "rank": 339,
+    "of": 339
+   },
+   "median_paid": {
+    "rank": 201,
+    "of": 339
+   },
+   "declarations": {
+    "rank": 226,
+    "of": 339
+   },
+   "owners_over_30k_share": {
+    "rank": 39,
+    "of": 339
+   }
+  },
+  "national": {
+   "median_premium": 1055,
+   "median_paid": 37248,
+   "owners_over_30k_share": 0.026
+  },
+  "gaps": {
+   "median_premium": {
+    "national": {
+     "ref": 1055,
+     "diff": -148,
+     "rel": -0.14
+    },
+    "state": {
+     "ref": 1041,
+     "diff": -134,
+     "rel": -0.129
+    }
+   },
+   "median_paid": {
+    "national": {
+     "ref": 37248,
+     "diff": -20595,
+     "rel": -0.553
+    },
+    "state": {
+     "ref": 27208,
+     "diff": -10555,
+     "rel": -0.388
+    }
+   },
+   "owners_over_30k_share": {
+    "national": {
+     "ref": 0.026,
+     "diff": 0.048,
+     "rel": 1.846
+    },
+    "state": {
+     "ref": 0.071,
+     "diff": 0.003,
+     "rel": 0.042
+    }
+   },
+   "declarations": {
+    "state_counties": {
+     "ref": 13,
+     "diff": -2,
+     "rel": -0.154
+    }
+   }
+  },
+  "rank_in_state": {
+   "policies": {
+    "rank": 3,
+    "of": 5
+   },
+   "median_premium": {
+    "rank": 5,
+    "of": 5
+   },
+   "paid_claims": {
+    "rank": 5,
+    "of": 5
+   },
+   "median_paid": {
+    "rank": 5,
+    "of": 5
+   },
+   "declarations": {
+    "rank": 4,
+    "of": 5
+   },
+   "owners_over_30k_share": {
+    "rank": 2,
+    "of": 5
+   }
+  },
+  "state": {
+   "median_premium": 1041,
+   "median_paid": 27208,
+   "owners_over_30k_share": 0.071,
+   "counties": 5,
+   "declarations_county_median": 13
+  }
+ },
+ "community_status": {
+  "n": 6,
+  "participating": 6,
+  "crs_classed": 1,
+  "share_classed": 0.167,
+  "best_class": 6,
+  "best_class_communities": [
+   "NORMAN,CITY OF"
+  ],
+  "oldest_current_map": {
+   "date": "2008-09-26",
+   "community": "LEXINGTON, CITY OF"
+  },
+  "sanctioned": 0,
+  "suspended": 0,
+  "withdrawn": 0,
+  "not_participating": 0,
+  "communities": [
+   {
+    "id": "400046",
+    "name": "NORMAN,CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 6,
+    "sfha_discount_pct": 20,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2021-01-15",
+    "current_map_code": null,
+    "first_firm": "1979-11-01",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "400475",
+    "name": "CLEVELAND COUNTY*",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2021-01-15",
+    "current_map_code": null,
+    "first_firm": "1989-06-01",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "400043",
+    "name": "LEXINGTON, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2008-09-26",
+    "current_map_code": null,
+    "first_firm": "1980-12-02",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "400044",
+    "name": "MOORE, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2024-03-27",
+    "current_map_code": null,
+    "first_firm": "1980-12-02",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "400045",
+    "name": "NOBLE, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2013-02-20",
+    "current_map_code": null,
+    "first_firm": "1981-07-02",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "400539",
+    "name": "SLAUGHTERVILLE, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2008-09-26",
+    "current_map_code": null,
+    "first_firm": "1992-04-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   }
+  ],
+  "multi_county_communities": [
+   {
+    "id": "405378",
+    "name": "OKLAHOMA CITY, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 8,
+    "sfha_discount_pct": 10,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2025-10-02",
+    "current_map_code": null,
+    "first_firm": "1972-07-14",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null,
+    "counties": "POTTAWATOMIE COUNTY/OKLAHOMA COUNTY/MCCLAIN COUNTY/CLEVELAND COUNTY/CANADIAN COUNTY"
+   },
+   {
+    "id": "400104",
+    "name": "PURCELL, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2008-09-26",
+    "current_map_code": null,
+    "first_firm": "1981-07-02",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null,
+    "counties": "CLEVELAND COUNTY/MCCLAIN COUNTY"
+   }
+  ],
+  "state_join_share": 0.061
+ }
+}

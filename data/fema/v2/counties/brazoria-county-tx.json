@@ -1,0 +1,879 @@
+{
+ "id": "48039",
+ "kind": "county",
+ "name": "Brazoria County",
+ "state": "TX",
+ "slug": "brazoria-county-tx",
+ "generated_at": "2026-10-12T13:15:44Z",
+ "sources": [
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-11",
+   "filter": "policyEffectiveDate ge '2025-01-01' and lt '2026-01-01', per propertyState (rows downloaded, every occupancy; residential and policyCost > 0 kept locally)"
+  },
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "$inlinecount per year 2019-2025: propertyState eq '<ST>' and occupancyType in (1,2,3,11,12,13,14) [and startswith(censusGeoid,'<county FIPS>')]"
+  },
+  {
+   "dataset": "NfipClaims",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipClaims",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "yearOfLoss eq <year> and amountPaidOnBuildingClaim gt 0 (one request per year)"
+  },
+  {
+   "dataset": "CPI-U, U.S. city average, all items (CUUR0000SA0), annual average",
+   "version": "BLS Public Data API v1",
+   "api": "https://api.bls.gov/publicAPI/v1/timeseries/data/",
+   "as_of": "annual averages 2005-2025",
+   "accessed_at": "2026-10-12",
+   "filter": "period M13"
+  },
+  {
+   "dataset": "DisasterDeclarationsSummaries",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/DisasterDeclarationsSummaries",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows); declarationType DR or EM, incidentType Flood, Hurricane, Severe Storm, Severe Storm(s), declarationDate >= 2000 kept locally"
+  },
+  {
+   "dataset": "HousingAssistanceOwners",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/HousingAssistanceOwners",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows)"
+  },
+  {
+   "dataset": "NfipCommunityStatusBook",
+   "version": "v1",
+   "api": "https://www.fema.gov/api/open/v1/NfipCommunityStatusBook",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "all rows; community -> county on the `county` text field"
+  }
+ ],
+ "notes": [
+  "FEMA field definition (NfipPolicies v3, policyCost): \"Calculated in dollars by adding together calculated premium, reserve fund assessment, federal policy fee, and HFIAA surcharge\"",
+  "FEMA field definition (NfipPolicies v3, totalInsurancePremiumOfThePolicy): \"Total Insurance Premium of the Policy in whole dollars. Negative values indicate a refund.\"; policyCost is used because it is what the policyholder pays; policyCost < totalInsurancePremiumOfThePolicy on 0 of 3117116 kept residential policies.",
+  "Premiums: one row = one policy term effective in 2025 (NFIP only, no private insurance); median and quartiles are Hyndman-Fan type 7, rounded half up to the dollar; a cell (State, zone, zone group, county) is published only when n >= 100.",
+  "Flood zones: ratedFloodZone grouped as A1-A30 -> AE, V1-V30 -> VE, B/C/X -> X, AOB -> AO, AHB -> AH, AR* -> AR; zone D and unknown zones are left out of the zone tables.",
+  "policies_trend: residential policy terms per year counted by the API ($inlinecount), all premiums included (policyCost <= 0 too), so the 2025 count can differ from premiums.n (county: the API count also filters propertyState, premiums.n does not).",
+  "Claims: amounts paid by NFIP on building claims (amountPaidOnBuildingClaim > 0), not repair costs; nominal dollars; median_paid_2024usd deflates each claim by its yearOfLoss with CPI-U annual averages (same series and method as nfip-paid-claims-by-state); NfipClaims asOfDate 2026-09-08.",
+  "Declarations: administrative decisions, not measured damage; scope = Flood, Hurricane, Severe Storm, Severe Storm(s), major disaster (DR) and emergency (EM), declared since 2000, counted once per disaster number.",
+  "Owners assistance: FEMA inspections of owner applicants to the Individuals and Households Program (inspected damage bands, not insurance claims or grants); NFIP and IHP figures measure different populations and are never added.",
+  "This product uses the Federal Emergency Management Agency’s OpenFEMA API, but is not endorsed by FEMA. The Federal Government or FEMA cannot vouch for the data or analyses derived from these data after the data have been retrieved from the Agency's website(s).",
+  "County of a policy = first 5 digits of censusGeoid (block group of the address); county of a claim = countyCode. FEMA: \"the County Code field may not reflect the individual county the property is located\".",
+  "Dominant event: Hurricane Harvey = 0.798 of paid claims 2015-2024.",
+  "Owners assistance: HousingAssistanceOwners has no FIPS field; rows joined on the county text (DDS designatedArea, then Census 2020 name). HA: \"the applicant has the right to choose the county\"."
+ ],
+ "premiums": {
+  "window": "policies effective 2025",
+  "occupancy": "residential (occupancyType 1,2,3,11,12,13,14)",
+  "field": "policyCost",
+  "n": 29279,
+  "median": 1051,
+  "q1": 846,
+  "q3": 1088,
+  "by_zone_group": [
+   {
+    "group": "SFHA (A, AE, AH, AO, AR, A99, V, VE)",
+    "n": 11816,
+    "median": 1066,
+    "q1": 904,
+    "q3": 1507
+   },
+   {
+    "group": "Outside SFHA (X, B, C)",
+    "n": 17463,
+    "median": 1028,
+    "q1": 812,
+    "q3": 1084
+   }
+  ],
+  "by_zone": [
+   {
+    "zone": "X",
+    "n": 17463,
+    "median": 1028,
+    "q1": 812,
+    "q3": 1084
+   },
+   {
+    "zone": "AE",
+    "n": 9583,
+    "median": 1057,
+    "q1": 919,
+    "q3": 1430
+   },
+   {
+    "zone": "AO",
+    "n": 1178,
+    "median": 899,
+    "q1": 785,
+    "q3": 1117
+   },
+   {
+    "zone": "VE",
+    "n": 925,
+    "median": 2285,
+    "q1": 1745,
+    "q3": 3023
+   }
+  ],
+  "policies_trend": [
+   {
+    "year": 2019,
+    "n": 37069
+   },
+   {
+    "year": 2020,
+    "n": 38888
+   },
+   {
+    "year": 2021,
+    "n": 38728
+   },
+   {
+    "year": 2022,
+    "n": 35484
+   },
+   {
+    "year": 2023,
+    "n": 33034
+   },
+   {
+    "year": 2024,
+    "n": 31688
+   },
+   {
+    "year": 2025,
+    "n": 29279
+   }
+  ]
+ },
+ "claims": {
+  "window": "year of loss 2015-2024",
+  "n_paid": 5300,
+  "median_paid": 58284,
+  "q1": 16716,
+  "q3": 94305,
+  "dollars": "nominal",
+  "median_paid_2024usd": 73881,
+  "top_events": [
+   {
+    "name": "Hurricane Harvey",
+    "n": 4232,
+    "share": 0.798
+   },
+   {
+    "name": "Early summer severe storms",
+    "n": 403,
+    "share": 0.076
+   },
+   {
+    "name": "Hurricane Beryl",
+    "n": 178,
+    "share": 0.034
+   },
+   {
+    "name": "Tropical Storm Beta",
+    "n": 46,
+    "share": 0.009
+   },
+   {
+    "name": "Tropical Storm Nicholas",
+    "n": 43,
+    "share": 0.008
+   }
+  ],
+  "dominant_event_share": 0.798,
+  "by_year": [
+   {
+    "year": 2015,
+    "n": 116
+   },
+   {
+    "year": 2016,
+    "n": 464
+   },
+   {
+    "year": 2017,
+    "n": 4275
+   },
+   {
+    "year": 2018,
+    "n": 7
+   },
+   {
+    "year": 2019,
+    "n": 89
+   },
+   {
+    "year": 2020,
+    "n": 64
+   },
+   {
+    "year": 2021,
+    "n": 82
+   },
+   {
+    "year": 2022,
+    "n": 4
+   },
+   {
+    "year": 2023,
+    "n": 0
+   },
+   {
+    "year": 2024,
+    "n": 199
+   }
+  ]
+ },
+ "declarations": {
+  "since": 2000,
+  "n_total": 16,
+  "by_incident_type": {
+   "Flood": 1,
+   "Hurricane": 12,
+   "Severe Storm": 3
+  },
+  "major_only": 9,
+  "latest": [
+   {
+    "id": "DR-4798",
+    "title": "HURRICANE BERYL",
+    "incident_type": "Hurricane",
+    "date": "2024-07-09"
+   },
+   {
+    "id": "EM-3540",
+    "title": "TROPICAL STORMS MARCO AND LAURA",
+    "incident_type": "Hurricane",
+    "date": "2020-08-24"
+   },
+   {
+    "id": "EM-3530",
+    "title": "HURRICANE HANNA",
+    "incident_type": "Hurricane",
+    "date": "2020-07-26"
+   },
+   {
+    "id": "DR-4332",
+    "title": "HURRICANE HARVEY",
+    "incident_type": "Hurricane",
+    "date": "2017-08-25"
+   },
+   {
+    "id": "DR-4272",
+    "title": "SEVERE STORMS AND FLOODING",
+    "incident_type": "Flood",
+    "date": "2016-06-11"
+   }
+  ]
+ },
+ "owners_assistance": {
+  "since": 2002,
+  "n_inspected": 39742,
+  "damage_bands": [
+   {
+    "band": "No FEMA-inspected damage",
+    "n": 11665
+   },
+   {
+    "band": "$1-$10,000",
+    "n": 21849
+   },
+   {
+    "band": "$10,001-$20,000",
+    "n": 3957
+   },
+   {
+    "band": "$20,001-$30,000",
+    "n": 1551
+   },
+   {
+    "band": "More than $30,000",
+    "n": 720
+   }
+  ],
+  "top_disasters": [
+   {
+    "id": "DR-4332",
+    "n": 15130,
+    "title": "HURRICANE HARVEY",
+    "date": "2017-08-25"
+   },
+   {
+    "id": "DR-1791",
+    "n": 11166,
+    "title": "HURRICANE IKE",
+    "date": "2008-09-13"
+   },
+   {
+    "id": "DR-4798",
+    "n": 8402,
+    "title": "HURRICANE BERYL",
+    "date": "2024-07-09"
+   },
+   {
+    "id": "DR-1606",
+    "n": 2200,
+    "title": "HURRICANE RITA",
+    "date": "2005-09-24"
+   },
+   {
+    "id": "DR-4272",
+    "n": 1133,
+    "title": "SEVERE STORMS AND FLOODING",
+    "date": "2016-06-11"
+   }
+  ]
+ },
+ "compare": {
+  "peers": {
+   "family": "counties",
+   "n": 339
+  },
+  "values": {
+   "policies": 29279,
+   "median_premium": 1051,
+   "paid_claims": 5300,
+   "median_paid": 58284,
+   "declarations": 16,
+   "owners_over_30k_share": 0.018
+  },
+  "rank_in_family": {
+   "policies": {
+    "rank": 21,
+    "of": 339
+   },
+   "median_premium": {
+    "rank": 180,
+    "of": 339
+   },
+   "paid_claims": {
+    "rank": 18,
+    "of": 339
+   },
+   "median_paid": {
+    "rank": 25,
+    "of": 339
+   },
+   "declarations": {
+    "rank": 127,
+    "of": 339
+   },
+   "owners_over_30k_share": {
+    "rank": 149,
+    "of": 339
+   }
+  },
+  "national": {
+   "median_premium": 1055,
+   "median_paid": 37248,
+   "owners_over_30k_share": 0.026
+  },
+  "gaps": {
+   "median_premium": {
+    "national": {
+     "ref": 1055,
+     "diff": -4,
+     "rel": -0.004
+    },
+    "state": {
+     "ref": 1056,
+     "diff": -5,
+     "rel": -0.005
+    }
+   },
+   "median_paid": {
+    "national": {
+     "ref": 37248,
+     "diff": 21036,
+     "rel": 0.565
+    },
+    "state": {
+     "ref": 55338,
+     "diff": 2946,
+     "rel": 0.053
+    }
+   },
+   "owners_over_30k_share": {
+    "national": {
+     "ref": 0.026,
+     "diff": -0.008,
+     "rel": -0.308
+    },
+    "state": {
+     "ref": 0.027,
+     "diff": -0.009,
+     "rel": -0.333
+    }
+   },
+   "declarations": {
+    "state_counties": {
+     "ref": 14,
+     "diff": 2,
+     "rel": 0.143
+    }
+   }
+  },
+  "rank_in_state": {
+   "policies": {
+    "rank": 4,
+    "of": 37
+   },
+   "median_premium": {
+    "rank": 16,
+    "of": 37
+   },
+   "paid_claims": {
+    "rank": 5,
+    "of": 37
+   },
+   "median_paid": {
+    "rank": 8,
+    "of": 37
+   },
+   "declarations": {
+    "rank": 8,
+    "of": 37
+   },
+   "owners_over_30k_share": {
+    "rank": 18,
+    "of": 37
+   }
+  },
+  "state": {
+   "median_premium": 1056,
+   "median_paid": 55338,
+   "owners_over_30k_share": 0.027,
+   "counties": 37,
+   "declarations_county_median": 14
+  }
+ },
+ "community_status": {
+  "n": 25,
+  "participating": 24,
+  "crs_classed": 0,
+  "share_classed": 0.0,
+  "best_class": null,
+  "best_class_communities": [],
+  "oldest_current_map": {
+   "date": "1973-12-28",
+   "community": "LAKE BARBARA, VILLAGE OF"
+  },
+  "sanctioned": 1,
+  "suspended": 0,
+  "withdrawn": 0,
+  "not_participating": 1,
+  "communities": [
+   {
+    "id": "485451",
+    "name": "ALVIN, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-12-30",
+    "current_map_code": null,
+    "first_firm": "1972-02-19",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "480064",
+    "name": "ANGLETON, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-12-30",
+    "current_map_code": null,
+    "first_firm": "1977-06-10",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "480065",
+    "name": "BAILEY'S PRAIRIE, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-12-30",
+    "current_map_code": null,
+    "first_firm": "1983-12-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "481300",
+    "name": "BONNEY, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-12-30",
+    "current_map_code": null,
+    "first_firm": "1971-05-08",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "485458",
+    "name": "BRAZORIA COUNTY *",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-12-30",
+    "current_map_code": null,
+    "first_firm": "1971-05-08",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "480066",
+    "name": "BRAZORIA, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-12-30",
+    "current_map_code": null,
+    "first_firm": "1983-12-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "480067",
+    "name": "BROOKSIDE VILLAGE, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-12-30",
+    "current_map_code": null,
+    "first_firm": "1984-11-01",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "480068",
+    "name": "CLUTE, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-12-30",
+    "current_map_code": null,
+    "first_firm": "1976-12-07",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "480069",
+    "name": "DANBURY, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-12-30",
+    "current_map_code": null,
+    "first_firm": "1981-09-16",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "485467",
+    "name": "FREEPORT, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-12-30",
+    "current_map_code": null,
+    "first_firm": "1970-11-17",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "485478",
+    "name": "HILLCREST VILLAGE, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-12-30",
+    "current_map_code": null,
+    "first_firm": "1972-03-17",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "485517",
+    "name": "HOLIDAY LAKES, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-12-30",
+    "current_map_code": null,
+    "first_firm": "1971-05-08",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "481071",
+    "name": "IOWA COLONY, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-12-30",
+    "current_map_code": null,
+    "first_firm": "1982-05-17",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "480072",
+    "name": "JONES CREEK, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-12-30",
+    "current_map_code": null,
+    "first_firm": "1985-06-05",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "481487",
+    "name": "LAKE BARBARA, VILLAGE OF",
+    "participating": false,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "1973-12-28",
+    "current_map_code": null,
+    "first_firm": null,
+    "sanction": true,
+    "sanction_date": "1975-01-09",
+    "sanction_code": null
+   },
+   {
+    "id": "485484",
+    "name": "LAKE JACKSON, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-12-30",
+    "current_map_code": null,
+    "first_firm": "1972-07-07",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "480075",
+    "name": "LIVERPOOL, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-12-30",
+    "current_map_code": null,
+    "first_firm": "1985-06-05",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "480076",
+    "name": "MANVEL, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-12-30",
+    "current_map_code": null,
+    "first_firm": "1981-12-01",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "481255",
+    "name": "OYSTER CREEK, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-12-30",
+    "current_map_code": null,
+    "first_firm": "1976-11-19",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "481301",
+    "name": "QUINTANA, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-12-30",
+    "current_map_code": null,
+    "first_firm": "1971-05-08",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "485502",
+    "name": "RICHWOOD, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-12-30",
+    "current_map_code": null,
+    "first_firm": "1972-07-28",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "480071",
+    "name": "SANDY POINT, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-12-30",
+    "current_map_code": null,
+    "first_firm": "1971-05-08",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "481266",
+    "name": "SURFSIDE BEACH, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-12-30",
+    "current_map_code": null,
+    "first_firm": "1971-05-08",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "485512",
+    "name": "SWEENY, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-12-30",
+    "current_map_code": null,
+    "first_firm": "1971-12-23",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "480081",
+    "name": "WEST COLUMBIA, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2020-12-30",
+    "current_map_code": null,
+    "first_firm": "1983-12-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   }
+  ],
+  "multi_county_communities": [
+   {
+    "id": "480077",
+    "name": "PEARLAND, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 5,
+    "sfha_discount_pct": 25,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2021-01-29",
+    "current_map_code": null,
+    "first_firm": "1984-07-05",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null,
+    "counties": "FORT BEND COUNTY/HARRIS COUNTY/BRAZORIA COUNTY"
+   }
+  ],
+  "state_join_share": 0.087
+ }
+}

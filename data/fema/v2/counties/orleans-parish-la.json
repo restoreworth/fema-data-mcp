@@ -1,0 +1,504 @@
+{
+ "id": "22071",
+ "kind": "county",
+ "name": "Orleans Parish",
+ "state": "LA",
+ "slug": "orleans-parish-la",
+ "generated_at": "2026-10-12T13:15:44Z",
+ "sources": [
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-11",
+   "filter": "policyEffectiveDate ge '2025-01-01' and lt '2026-01-01', per propertyState (rows downloaded, every occupancy; residential and policyCost > 0 kept locally)"
+  },
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "$inlinecount per year 2019-2025: propertyState eq '<ST>' and occupancyType in (1,2,3,11,12,13,14) [and startswith(censusGeoid,'<county FIPS>')]"
+  },
+  {
+   "dataset": "NfipClaims",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipClaims",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "yearOfLoss eq <year> and amountPaidOnBuildingClaim gt 0 (one request per year)"
+  },
+  {
+   "dataset": "CPI-U, U.S. city average, all items (CUUR0000SA0), annual average",
+   "version": "BLS Public Data API v1",
+   "api": "https://api.bls.gov/publicAPI/v1/timeseries/data/",
+   "as_of": "annual averages 2005-2025",
+   "accessed_at": "2026-10-12",
+   "filter": "period M13"
+  },
+  {
+   "dataset": "DisasterDeclarationsSummaries",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/DisasterDeclarationsSummaries",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows); declarationType DR or EM, incidentType Flood, Hurricane, Severe Storm, Severe Storm(s), declarationDate >= 2000 kept locally"
+  },
+  {
+   "dataset": "HousingAssistanceOwners",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/HousingAssistanceOwners",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows)"
+  },
+  {
+   "dataset": "NfipCommunityStatusBook",
+   "version": "v1",
+   "api": "https://www.fema.gov/api/open/v1/NfipCommunityStatusBook",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "all rows; community -> county on the `county` text field"
+  }
+ ],
+ "notes": [
+  "FEMA field definition (NfipPolicies v3, policyCost): \"Calculated in dollars by adding together calculated premium, reserve fund assessment, federal policy fee, and HFIAA surcharge\"",
+  "FEMA field definition (NfipPolicies v3, totalInsurancePremiumOfThePolicy): \"Total Insurance Premium of the Policy in whole dollars. Negative values indicate a refund.\"; policyCost is used because it is what the policyholder pays; policyCost < totalInsurancePremiumOfThePolicy on 0 of 3117116 kept residential policies.",
+  "Premiums: one row = one policy term effective in 2025 (NFIP only, no private insurance); median and quartiles are Hyndman-Fan type 7, rounded half up to the dollar; a cell (State, zone, zone group, county) is published only when n >= 100.",
+  "Flood zones: ratedFloodZone grouped as A1-A30 -> AE, V1-V30 -> VE, B/C/X -> X, AOB -> AO, AHB -> AH, AR* -> AR; zone D and unknown zones are left out of the zone tables.",
+  "policies_trend: residential policy terms per year counted by the API ($inlinecount), all premiums included (policyCost <= 0 too), so the 2025 count can differ from premiums.n (county: the API count also filters propertyState, premiums.n does not).",
+  "Claims: amounts paid by NFIP on building claims (amountPaidOnBuildingClaim > 0), not repair costs; nominal dollars; median_paid_2024usd deflates each claim by its yearOfLoss with CPI-U annual averages (same series and method as nfip-paid-claims-by-state); NfipClaims asOfDate 2026-09-08.",
+  "Declarations: administrative decisions, not measured damage; scope = Flood, Hurricane, Severe Storm, Severe Storm(s), major disaster (DR) and emergency (EM), declared since 2000, counted once per disaster number.",
+  "Owners assistance: FEMA inspections of owner applicants to the Individuals and Households Program (inspected damage bands, not insurance claims or grants); NFIP and IHP figures measure different populations and are never added.",
+  "This product uses the Federal Emergency Management Agency’s OpenFEMA API, but is not endorsed by FEMA. The Federal Government or FEMA cannot vouch for the data or analyses derived from these data after the data have been retrieved from the Agency's website(s).",
+  "County of a policy = first 5 digits of censusGeoid (block group of the address); county of a claim = countyCode. FEMA: \"the County Code field may not reflect the individual county the property is located\".",
+  "Dominant event: Hurricane Ida = 0.288 of paid claims 2015-2024.",
+  "Owners assistance: HousingAssistanceOwners has no FIPS field; rows joined on the county text (DDS designatedArea, then Census 2020 name). HA: \"the applicant has the right to choose the county\"."
+ ],
+ "premiums": {
+  "window": "policies effective 2025",
+  "occupancy": "residential (occupancyType 1,2,3,11,12,13,14)",
+  "field": "policyCost",
+  "n": 57653,
+  "median": 1080,
+  "q1": 958,
+  "q3": 1260,
+  "by_zone_group": [
+   {
+    "group": "SFHA (A, AE, AH, AO, AR, A99, V, VE)",
+    "n": 18089,
+    "median": 1211,
+    "q1": 998,
+    "q3": 1632
+   },
+   {
+    "group": "Outside SFHA (X, B, C)",
+    "n": 39564,
+    "median": 1078,
+    "q1": 943,
+    "q3": 1087
+   }
+  ],
+  "by_zone": [
+   {
+    "zone": "X",
+    "n": 39564,
+    "median": 1078,
+    "q1": 943,
+    "q3": 1087
+   },
+   {
+    "zone": "AE",
+    "n": 17806,
+    "median": 1209,
+    "q1": 997,
+    "q3": 1625
+   },
+   {
+    "zone": "VE",
+    "n": 160,
+    "median": 3376,
+    "q1": 2306,
+    "q3": 4555
+   },
+   {
+    "zone": "AO",
+    "n": 122,
+    "median": 1076,
+    "q1": 997,
+    "q3": 1084
+   }
+  ],
+  "policies_trend": [
+   {
+    "year": 2019,
+    "n": 71893
+   },
+   {
+    "year": 2020,
+    "n": 73153
+   },
+   {
+    "year": 2021,
+    "n": 72441
+   },
+   {
+    "year": 2022,
+    "n": 67860
+   },
+   {
+    "year": 2023,
+    "n": 63709
+   },
+   {
+    "year": 2024,
+    "n": 60758
+   },
+   {
+    "year": 2025,
+    "n": 57653
+   }
+  ]
+ },
+ "claims": {
+  "window": "year of loss 2015-2024",
+  "n_paid": 2891,
+  "median_paid": 18652,
+  "q1": 6774,
+  "q3": 43146,
+  "dollars": "nominal",
+  "median_paid_2024usd": 22473,
+  "top_events": [
+   {
+    "name": "Hurricane Ida",
+    "n": 833,
+    "share": 0.288
+   },
+   {
+    "name": "Tropical Storm Barry",
+    "n": 681,
+    "share": 0.236
+   },
+   {
+    "name": "Greater New Orleans Flooding",
+    "n": 628,
+    "share": 0.217
+   },
+   {
+    "name": "Hurricane Francine",
+    "n": 94,
+    "share": 0.033
+   },
+   {
+    "name": "Hurricane Zeta",
+    "n": 30,
+    "share": 0.01
+   }
+  ],
+  "dominant_event_share": 0.288,
+  "by_year": [
+   {
+    "year": 2015,
+    "n": 24
+   },
+   {
+    "year": 2016,
+    "n": 19
+   },
+   {
+    "year": 2017,
+    "n": 684
+   },
+   {
+    "year": 2018,
+    "n": 19
+   },
+   {
+    "year": 2019,
+    "n": 884
+   },
+   {
+    "year": 2020,
+    "n": 122
+   },
+   {
+    "year": 2021,
+    "n": 891
+   },
+   {
+    "year": 2022,
+    "n": 17
+   },
+   {
+    "year": 2023,
+    "n": 42
+   },
+   {
+    "year": 2024,
+    "n": 189
+   }
+  ]
+ },
+ "declarations": {
+  "since": 2000,
+  "n_total": 26,
+  "by_incident_type": {
+   "Flood": 0,
+   "Hurricane": 25,
+   "Severe Storm": 1
+  },
+  "major_only": 15,
+  "latest": [
+   {
+    "id": "DR-4817",
+    "title": "HURRICANE FRANCINE",
+    "incident_type": "Hurricane",
+    "date": "2024-09-16"
+   },
+   {
+    "id": "EM-3614",
+    "title": "TROPICAL STORM FRANCINE",
+    "incident_type": "Hurricane",
+    "date": "2024-09-10"
+   },
+   {
+    "id": "DR-4611",
+    "title": "HURRICANE IDA",
+    "incident_type": "Hurricane",
+    "date": "2021-08-29"
+   },
+   {
+    "id": "EM-3568",
+    "title": "TROPICAL STORM IDA",
+    "incident_type": "Hurricane",
+    "date": "2021-08-27"
+   },
+   {
+    "id": "DR-4577",
+    "title": "HURRICANE ZETA",
+    "incident_type": "Hurricane",
+    "date": "2021-01-12"
+   }
+  ]
+ },
+ "owners_assistance": {
+  "since": 2002,
+  "n_inspected": 89442,
+  "damage_bands": [
+   {
+    "band": "No FEMA-inspected damage",
+    "n": 26646
+   },
+   {
+    "band": "$1-$10,000",
+    "n": 44684
+   },
+   {
+    "band": "$10,001-$20,000",
+    "n": 5598
+   },
+   {
+    "band": "$20,001-$30,000",
+    "n": 1301
+   },
+   {
+    "band": "More than $30,000",
+    "n": 11213
+   }
+  ],
+  "top_disasters": [
+   {
+    "id": "DR-1603",
+    "n": 48614,
+    "title": "HURRICANE KATRINA",
+    "date": "2005-08-29"
+   },
+   {
+    "id": "DR-4611",
+    "n": 18822,
+    "title": "HURRICANE IDA",
+    "date": "2021-08-29"
+   },
+   {
+    "id": "DR-4080",
+    "n": 10839,
+    "title": "HURRICANE ISAAC",
+    "date": "2012-08-29"
+   },
+   {
+    "id": "DR-1786",
+    "n": 8512,
+    "title": "HURRICANE GUSTAV",
+    "date": "2008-09-02"
+   },
+   {
+    "id": "DR-4577",
+    "n": 1014,
+    "title": "HURRICANE ZETA",
+    "date": "2021-01-12"
+   }
+  ]
+ },
+ "compare": {
+  "peers": {
+   "family": "counties",
+   "n": 339
+  },
+  "values": {
+   "policies": 57653,
+   "median_premium": 1080,
+   "paid_claims": 2891,
+   "median_paid": 18652,
+   "declarations": 26,
+   "owners_over_30k_share": 0.125
+  },
+  "rank_in_family": {
+   "policies": {
+    "rank": 8,
+    "of": 339
+   },
+   "median_premium": {
+    "rank": 156,
+    "of": 339
+   },
+   "paid_claims": {
+    "rank": 31,
+    "of": 339
+   },
+   "median_paid": {
+    "rank": 173,
+    "of": 339
+   },
+   "declarations": {
+    "rank": 19,
+    "of": 339
+   },
+   "owners_over_30k_share": {
+    "rank": 17,
+    "of": 339
+   }
+  },
+  "national": {
+   "median_premium": 1055,
+   "median_paid": 37248,
+   "owners_over_30k_share": 0.026
+  },
+  "gaps": {
+   "median_premium": {
+    "national": {
+     "ref": 1055,
+     "diff": 25,
+     "rel": 0.024
+    },
+    "state": {
+     "ref": 1079,
+     "diff": 1,
+     "rel": 0.001
+    }
+   },
+   "median_paid": {
+    "national": {
+     "ref": 37248,
+     "diff": -18596,
+     "rel": -0.499
+    },
+    "state": {
+     "ref": 52212,
+     "diff": -33560,
+     "rel": -0.643
+    }
+   },
+   "owners_over_30k_share": {
+    "national": {
+     "ref": 0.026,
+     "diff": 0.099,
+     "rel": 3.808
+    },
+    "state": {
+     "ref": 0.048,
+     "diff": 0.077,
+     "rel": 1.604
+    }
+   },
+   "declarations": {
+    "state_counties": {
+     "ref": 26,
+     "diff": 0,
+     "rel": 0.0
+    }
+   }
+  },
+  "rank_in_state": {
+   "policies": {
+    "rank": 2,
+    "of": 38
+   },
+   "median_premium": {
+    "rank": 18,
+    "of": 38
+   },
+   "paid_claims": {
+    "rank": 8,
+    "of": 38
+   },
+   "median_paid": {
+    "rank": 31,
+    "of": 38
+   },
+   "declarations": {
+    "rank": 18,
+    "of": 38
+   },
+   "owners_over_30k_share": {
+    "rank": 4,
+    "of": 38
+   }
+  },
+  "state": {
+   "median_premium": 1079,
+   "median_paid": 52212,
+   "owners_over_30k_share": 0.048,
+   "counties": 38,
+   "declarations_county_median": 26
+  }
+ },
+ "community_status": {
+  "n": 1,
+  "participating": 1,
+  "crs_classed": 1,
+  "share_classed": 1.0,
+  "best_class": 7,
+  "best_class_communities": [
+   "NEW ORLEANS/ORLEANS PARISH*"
+  ],
+  "oldest_current_map": {
+   "date": "2016-09-30",
+   "community": "NEW ORLEANS/ORLEANS PARISH*"
+  },
+  "sanctioned": 0,
+  "suspended": 0,
+  "withdrawn": 0,
+  "not_participating": 0,
+  "communities": [
+   {
+    "id": "225203",
+    "name": "NEW ORLEANS/ORLEANS PARISH*",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 7,
+    "sfha_discount_pct": 15,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2016-09-30",
+    "current_map_code": null,
+    "first_firm": "1971-10-19",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   }
+  ],
+  "multi_county_communities": [],
+  "state_join_share": 0.023
+ }
+}

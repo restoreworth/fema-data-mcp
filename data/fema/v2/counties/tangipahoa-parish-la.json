@@ -1,0 +1,617 @@
+{
+ "id": "22105",
+ "kind": "county",
+ "name": "Tangipahoa Parish",
+ "state": "LA",
+ "slug": "tangipahoa-parish-la",
+ "generated_at": "2026-10-12T13:15:44Z",
+ "sources": [
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-11",
+   "filter": "policyEffectiveDate ge '2025-01-01' and lt '2026-01-01', per propertyState (rows downloaded, every occupancy; residential and policyCost > 0 kept locally)"
+  },
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "$inlinecount per year 2019-2025: propertyState eq '<ST>' and occupancyType in (1,2,3,11,12,13,14) [and startswith(censusGeoid,'<county FIPS>')]"
+  },
+  {
+   "dataset": "NfipClaims",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipClaims",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "yearOfLoss eq <year> and amountPaidOnBuildingClaim gt 0 (one request per year)"
+  },
+  {
+   "dataset": "CPI-U, U.S. city average, all items (CUUR0000SA0), annual average",
+   "version": "BLS Public Data API v1",
+   "api": "https://api.bls.gov/publicAPI/v1/timeseries/data/",
+   "as_of": "annual averages 2005-2025",
+   "accessed_at": "2026-10-12",
+   "filter": "period M13"
+  },
+  {
+   "dataset": "DisasterDeclarationsSummaries",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/DisasterDeclarationsSummaries",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows); declarationType DR or EM, incidentType Flood, Hurricane, Severe Storm, Severe Storm(s), declarationDate >= 2000 kept locally"
+  },
+  {
+   "dataset": "HousingAssistanceOwners",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/HousingAssistanceOwners",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows)"
+  },
+  {
+   "dataset": "NfipCommunityStatusBook",
+   "version": "v1",
+   "api": "https://www.fema.gov/api/open/v1/NfipCommunityStatusBook",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "all rows; community -> county on the `county` text field"
+  }
+ ],
+ "notes": [
+  "FEMA field definition (NfipPolicies v3, policyCost): \"Calculated in dollars by adding together calculated premium, reserve fund assessment, federal policy fee, and HFIAA surcharge\"",
+  "FEMA field definition (NfipPolicies v3, totalInsurancePremiumOfThePolicy): \"Total Insurance Premium of the Policy in whole dollars. Negative values indicate a refund.\"; policyCost is used because it is what the policyholder pays; policyCost < totalInsurancePremiumOfThePolicy on 0 of 3117116 kept residential policies.",
+  "Premiums: one row = one policy term effective in 2025 (NFIP only, no private insurance); median and quartiles are Hyndman-Fan type 7, rounded half up to the dollar; a cell (State, zone, zone group, county) is published only when n >= 100.",
+  "Flood zones: ratedFloodZone grouped as A1-A30 -> AE, V1-V30 -> VE, B/C/X -> X, AOB -> AO, AHB -> AH, AR* -> AR; zone D and unknown zones are left out of the zone tables.",
+  "policies_trend: residential policy terms per year counted by the API ($inlinecount), all premiums included (policyCost <= 0 too), so the 2025 count can differ from premiums.n (county: the API count also filters propertyState, premiums.n does not).",
+  "Claims: amounts paid by NFIP on building claims (amountPaidOnBuildingClaim > 0), not repair costs; nominal dollars; median_paid_2024usd deflates each claim by its yearOfLoss with CPI-U annual averages (same series and method as nfip-paid-claims-by-state); NfipClaims asOfDate 2026-09-08.",
+  "Declarations: administrative decisions, not measured damage; scope = Flood, Hurricane, Severe Storm, Severe Storm(s), major disaster (DR) and emergency (EM), declared since 2000, counted once per disaster number.",
+  "Owners assistance: FEMA inspections of owner applicants to the Individuals and Households Program (inspected damage bands, not insurance claims or grants); NFIP and IHP figures measure different populations and are never added.",
+  "This product uses the Federal Emergency Management Agency’s OpenFEMA API, but is not endorsed by FEMA. The Federal Government or FEMA cannot vouch for the data or analyses derived from these data after the data have been retrieved from the Agency's website(s).",
+  "County of a policy = first 5 digits of censusGeoid (block group of the address); county of a claim = countyCode. FEMA: \"the County Code field may not reflect the individual county the property is located\".",
+  "Dominant event: Mid-summer severe storms = 0.41 of paid claims 2015-2024.",
+  "Owners assistance: HousingAssistanceOwners has no FIPS field; rows joined on the county text (DDS designatedArea, then Census 2020 name). HA: \"the applicant has the right to choose the county\"."
+ ],
+ "premiums": {
+  "window": "policies effective 2025",
+  "occupancy": "residential (occupancyType 1,2,3,11,12,13,14)",
+  "field": "policyCost",
+  "n": 7286,
+  "median": 1081,
+  "q1": 931,
+  "q3": 1204,
+  "by_zone_group": [
+   {
+    "group": "SFHA (A, AE, AH, AO, AR, A99, V, VE)",
+    "n": 3048,
+    "median": 1148,
+    "q1": 889,
+    "q3": 1476
+   },
+   {
+    "group": "Outside SFHA (X, B, C)",
+    "n": 4238,
+    "median": 1077,
+    "q1": 953,
+    "q3": 1086
+   }
+  ],
+  "by_zone": [
+   {
+    "zone": "X",
+    "n": 4238,
+    "median": 1077,
+    "q1": 953,
+    "q3": 1086
+   },
+   {
+    "zone": "AE",
+    "n": 1535,
+    "median": 1171,
+    "q1": 892,
+    "q3": 1538
+   },
+   {
+    "zone": "A",
+    "n": 1494,
+    "median": 1126,
+    "q1": 882,
+    "q3": 1428
+   }
+  ],
+  "policies_trend": [
+   {
+    "year": 2019,
+    "n": 9493
+   },
+   {
+    "year": 2020,
+    "n": 10102
+   },
+   {
+    "year": 2021,
+    "n": 10035
+   },
+   {
+    "year": 2022,
+    "n": 9215
+   },
+   {
+    "year": 2023,
+    "n": 8434
+   },
+   {
+    "year": 2024,
+    "n": 7966
+   },
+   {
+    "year": 2025,
+    "n": 7286
+   }
+  ]
+ },
+ "claims": {
+  "window": "year of loss 2015-2024",
+  "n_paid": 2431,
+  "median_paid": 48049,
+  "q1": 16379,
+  "q3": 73430,
+  "dollars": "nominal",
+  "median_paid_2024usd": 59398,
+  "top_events": [
+   {
+    "name": "Mid-summer severe storms",
+    "n": 997,
+    "share": 0.41
+   },
+   {
+    "name": "Hurricane Ida",
+    "n": 844,
+    "share": 0.347
+   },
+   {
+    "name": "Late winter severe storms",
+    "n": 505,
+    "share": 0.208
+   },
+   {
+    "name": "Hurricane Francine",
+    "n": 6,
+    "share": 0.002
+   },
+   {
+    "name": "2021 Mid-Spring Severe Storms",
+    "n": 1,
+    "share": 0.0
+   }
+  ],
+  "dominant_event_share": 0.41,
+  "by_year": [
+   {
+    "year": 2015,
+    "n": 0
+   },
+   {
+    "year": 2016,
+    "n": 1509
+   },
+   {
+    "year": 2017,
+    "n": 5
+   },
+   {
+    "year": 2018,
+    "n": 2
+   },
+   {
+    "year": 2019,
+    "n": 8
+   },
+   {
+    "year": 2020,
+    "n": 43
+   },
+   {
+    "year": 2021,
+    "n": 853
+   },
+   {
+    "year": 2022,
+    "n": 2
+   },
+   {
+    "year": 2023,
+    "n": 2
+   },
+   {
+    "year": 2024,
+    "n": 7
+   }
+  ]
+ },
+ "declarations": {
+  "since": 2000,
+  "n_total": 27,
+  "by_incident_type": {
+   "Flood": 2,
+   "Hurricane": 25,
+   "Severe Storm": 0
+  },
+  "major_only": 16,
+  "latest": [
+   {
+    "id": "DR-4817",
+    "title": "HURRICANE FRANCINE",
+    "incident_type": "Hurricane",
+    "date": "2024-09-16"
+   },
+   {
+    "id": "EM-3614",
+    "title": "TROPICAL STORM FRANCINE",
+    "incident_type": "Hurricane",
+    "date": "2024-09-10"
+   },
+   {
+    "id": "DR-4611",
+    "title": "HURRICANE IDA",
+    "incident_type": "Hurricane",
+    "date": "2021-08-29"
+   },
+   {
+    "id": "EM-3568",
+    "title": "TROPICAL STORM IDA",
+    "incident_type": "Hurricane",
+    "date": "2021-08-27"
+   },
+   {
+    "id": "DR-4577",
+    "title": "HURRICANE ZETA",
+    "incident_type": "Hurricane",
+    "date": "2021-01-12"
+   }
+  ]
+ },
+ "owners_assistance": {
+  "since": 2002,
+  "n_inspected": 52904,
+  "damage_bands": [
+   {
+    "band": "No FEMA-inspected damage",
+    "n": 12001
+   },
+   {
+    "band": "$1-$10,000",
+    "n": 36532
+   },
+   {
+    "band": "$10,001-$20,000",
+    "n": 2950
+   },
+   {
+    "band": "$20,001-$30,000",
+    "n": 922
+   },
+   {
+    "band": "More than $30,000",
+    "n": 499
+   }
+  ],
+  "top_disasters": [
+   {
+    "id": "DR-1603",
+    "n": 20211,
+    "title": "HURRICANE KATRINA",
+    "date": "2005-08-29"
+   },
+   {
+    "id": "DR-4611",
+    "n": 11805,
+    "title": "HURRICANE IDA",
+    "date": "2021-08-29"
+   },
+   {
+    "id": "DR-4277",
+    "n": 5933,
+    "title": "SEVERE STORMS AND FLOODING",
+    "date": "2016-08-14"
+   },
+   {
+    "id": "DR-4080",
+    "n": 5263,
+    "title": "HURRICANE ISAAC",
+    "date": "2012-08-29"
+   },
+   {
+    "id": "DR-1786",
+    "n": 4357,
+    "title": "HURRICANE GUSTAV",
+    "date": "2008-09-02"
+   }
+  ]
+ },
+ "compare": {
+  "peers": {
+   "family": "counties",
+   "n": 339
+  },
+  "values": {
+   "policies": 7286,
+   "median_premium": 1081,
+   "paid_claims": 2431,
+   "median_paid": 48049,
+   "declarations": 27,
+   "owners_over_30k_share": 0.009
+  },
+  "rank_in_family": {
+   "policies": {
+    "rank": 77,
+    "of": 339
+   },
+   "median_premium": {
+    "rank": 153,
+    "of": 339
+   },
+   "paid_claims": {
+    "rank": 38,
+    "of": 339
+   },
+   "median_paid": {
+    "rank": 39,
+    "of": 339
+   },
+   "declarations": {
+    "rank": 11,
+    "of": 339
+   },
+   "owners_over_30k_share": {
+    "rank": 210,
+    "of": 339
+   }
+  },
+  "national": {
+   "median_premium": 1055,
+   "median_paid": 37248,
+   "owners_over_30k_share": 0.026
+  },
+  "gaps": {
+   "median_premium": {
+    "national": {
+     "ref": 1055,
+     "diff": 26,
+     "rel": 0.025
+    },
+    "state": {
+     "ref": 1079,
+     "diff": 2,
+     "rel": 0.002
+    }
+   },
+   "median_paid": {
+    "national": {
+     "ref": 37248,
+     "diff": 10801,
+     "rel": 0.29
+    },
+    "state": {
+     "ref": 52212,
+     "diff": -4163,
+     "rel": -0.08
+    }
+   },
+   "owners_over_30k_share": {
+    "national": {
+     "ref": 0.026,
+     "diff": -0.017,
+     "rel": -0.654
+    },
+    "state": {
+     "ref": 0.048,
+     "diff": -0.039,
+     "rel": -0.813
+    }
+   },
+   "declarations": {
+    "state_counties": {
+     "ref": 26,
+     "diff": 1,
+     "rel": 0.038
+    }
+   }
+  },
+  "rank_in_state": {
+   "policies": {
+    "rank": 13,
+    "of": 38
+   },
+   "median_premium": {
+    "rank": 16,
+    "of": 38
+   },
+   "paid_claims": {
+    "rank": 10,
+    "of": 38
+   },
+   "median_paid": {
+    "rank": 6,
+    "of": 38
+   },
+   "declarations": {
+    "rank": 11,
+    "of": 38
+   },
+   "owners_over_30k_share": {
+    "rank": 29,
+    "of": 38
+   }
+  },
+  "state": {
+   "median_premium": 1079,
+   "median_paid": 52212,
+   "owners_over_30k_share": 0.048,
+   "counties": 38,
+   "declarations_county_median": 26
+  }
+ },
+ "community_status": {
+  "n": 9,
+  "participating": 9,
+  "crs_classed": 1,
+  "share_classed": 0.111,
+  "best_class": 8,
+  "best_class_communities": [
+   "TANGIPAHOA PARISH*"
+  ],
+  "oldest_current_map": {
+   "date": "2010-07-22",
+   "community": "TANGIPAHOA PARISH*"
+  },
+  "sanctioned": 0,
+  "suspended": 0,
+  "withdrawn": 0,
+  "not_participating": 0,
+  "communities": [
+   {
+    "id": "220206",
+    "name": "TANGIPAHOA PARISH*",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 8,
+    "sfha_discount_pct": 10,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2010-07-22",
+    "current_map_code": null,
+    "first_firm": "1983-02-02",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "220207",
+    "name": "AMITE CITY, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2010-07-22",
+    "current_map_code": null,
+    "first_firm": "2010-07-22",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "220208",
+    "name": "HAMMOND, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2010-07-22",
+    "current_map_code": null,
+    "first_firm": "1981-12-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "220209",
+    "name": "INDEPENDENCE, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2010-07-22",
+    "current_map_code": "M",
+    "first_firm": "1977-07-05",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "220210",
+    "name": "KENTWOOD, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2010-07-22",
+    "current_map_code": null,
+    "first_firm": "1980-04-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "220211",
+    "name": "PONCHATOULA, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2010-07-22",
+    "current_map_code": null,
+    "first_firm": "1979-04-17",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "220212",
+    "name": "ROSELAND, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2010-07-22",
+    "current_map_code": "L",
+    "first_firm": "1987-09-01",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "220213",
+    "name": "TANGIPAHOA, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2010-07-22",
+    "current_map_code": null,
+    "first_firm": "1979-09-28",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "220214",
+    "name": "TICKFAW, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2010-07-22",
+    "current_map_code": null,
+    "first_firm": "1977-06-28",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   }
+  ],
+  "multi_county_communities": [],
+  "state_join_share": 0.023
+ }
+}

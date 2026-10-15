@@ -1,0 +1,1019 @@
+{
+ "id": "12086",
+ "kind": "county",
+ "name": "Miami-Dade County",
+ "state": "FL",
+ "slug": "miami-dade-county-fl",
+ "generated_at": "2026-10-12T13:15:44Z",
+ "sources": [
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-11",
+   "filter": "policyEffectiveDate ge '2025-01-01' and lt '2026-01-01', per propertyState (rows downloaded, every occupancy; residential and policyCost > 0 kept locally)"
+  },
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "$inlinecount per year 2019-2025: propertyState eq '<ST>' and occupancyType in (1,2,3,11,12,13,14) [and startswith(censusGeoid,'<county FIPS>')]"
+  },
+  {
+   "dataset": "NfipClaims",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipClaims",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "yearOfLoss eq <year> and amountPaidOnBuildingClaim gt 0 (one request per year)"
+  },
+  {
+   "dataset": "CPI-U, U.S. city average, all items (CUUR0000SA0), annual average",
+   "version": "BLS Public Data API v1",
+   "api": "https://api.bls.gov/publicAPI/v1/timeseries/data/",
+   "as_of": "annual averages 2005-2025",
+   "accessed_at": "2026-10-12",
+   "filter": "period M13"
+  },
+  {
+   "dataset": "DisasterDeclarationsSummaries",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/DisasterDeclarationsSummaries",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows); declarationType DR or EM, incidentType Flood, Hurricane, Severe Storm, Severe Storm(s), declarationDate >= 2000 kept locally"
+  },
+  {
+   "dataset": "HousingAssistanceOwners",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/HousingAssistanceOwners",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows)"
+  },
+  {
+   "dataset": "NfipCommunityStatusBook",
+   "version": "v1",
+   "api": "https://www.fema.gov/api/open/v1/NfipCommunityStatusBook",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "all rows; community -> county on the `county` text field"
+  }
+ ],
+ "notes": [
+  "FEMA field definition (NfipPolicies v3, policyCost): \"Calculated in dollars by adding together calculated premium, reserve fund assessment, federal policy fee, and HFIAA surcharge\"",
+  "FEMA field definition (NfipPolicies v3, totalInsurancePremiumOfThePolicy): \"Total Insurance Premium of the Policy in whole dollars. Negative values indicate a refund.\"; policyCost is used because it is what the policyholder pays; policyCost < totalInsurancePremiumOfThePolicy on 0 of 3117116 kept residential policies.",
+  "Premiums: one row = one policy term effective in 2025 (NFIP only, no private insurance); median and quartiles are Hyndman-Fan type 7, rounded half up to the dollar; a cell (State, zone, zone group, county) is published only when n >= 100.",
+  "Flood zones: ratedFloodZone grouped as A1-A30 -> AE, V1-V30 -> VE, B/C/X -> X, AOB -> AO, AHB -> AH, AR* -> AR; zone D and unknown zones are left out of the zone tables.",
+  "policies_trend: residential policy terms per year counted by the API ($inlinecount), all premiums included (policyCost <= 0 too), so the 2025 count can differ from premiums.n (county: the API count also filters propertyState, premiums.n does not).",
+  "Claims: amounts paid by NFIP on building claims (amountPaidOnBuildingClaim > 0), not repair costs; nominal dollars; median_paid_2024usd deflates each claim by its yearOfLoss with CPI-U annual averages (same series and method as nfip-paid-claims-by-state); NfipClaims asOfDate 2026-09-08.",
+  "Declarations: administrative decisions, not measured damage; scope = Flood, Hurricane, Severe Storm, Severe Storm(s), major disaster (DR) and emergency (EM), declared since 2000, counted once per disaster number.",
+  "Owners assistance: FEMA inspections of owner applicants to the Individuals and Households Program (inspected damage bands, not insurance claims or grants); NFIP and IHP figures measure different populations and are never added.",
+  "This product uses the Federal Emergency Management Agency’s OpenFEMA API, but is not endorsed by FEMA. The Federal Government or FEMA cannot vouch for the data or analyses derived from these data after the data have been retrieved from the Agency's website(s).",
+  "County of a policy = first 5 digits of censusGeoid (block group of the address); county of a claim = countyCode. FEMA: \"the County Code field may not reflect the individual county the property is located\".",
+  "Dominant event: Hurricane Irma = 0.442 of paid claims 2015-2024.",
+  "Owners assistance: HousingAssistanceOwners has no FIPS field; rows joined on the county text (DDS designatedArea, then Census 2020 name). HA: \"the applicant has the right to choose the county\"."
+ ],
+ "premiums": {
+  "window": "policies effective 2025",
+  "occupancy": "residential (occupancyType 1,2,3,11,12,13,14)",
+  "field": "policyCost",
+  "n": 159388,
+  "median": 876,
+  "q1": 658,
+  "q3": 1169,
+  "by_zone_group": [
+   {
+    "group": "SFHA (A, AE, AH, AO, AR, A99, V, VE)",
+    "n": 143965,
+    "median": 851,
+    "q1": 644,
+    "q3": 1179
+   },
+   {
+    "group": "Outside SFHA (X, B, C)",
+    "n": 15422,
+    "median": 1077,
+    "q1": 840,
+    "q3": 1087
+   }
+  ],
+  "by_zone": [
+   {
+    "zone": "AH",
+    "n": 76682,
+    "median": 844,
+    "q1": 681,
+    "q3": 985
+   },
+   {
+    "zone": "AE",
+    "n": 66937,
+    "median": 896,
+    "q1": 575,
+    "q3": 1818
+   },
+   {
+    "zone": "X",
+    "n": 15422,
+    "median": 1077,
+    "q1": 840,
+    "q3": 1087
+   },
+   {
+    "zone": "VE",
+    "n": 237,
+    "median": 3551,
+    "q1": 2259,
+    "q3": 6603
+   },
+   {
+    "zone": "A",
+    "n": 108,
+    "median": 994,
+    "q1": 682,
+    "q3": 1567
+   }
+  ],
+  "policies_trend": [
+   {
+    "year": 2019,
+    "n": 167576
+   },
+   {
+    "year": 2020,
+    "n": 169057
+   },
+   {
+    "year": 2021,
+    "n": 168781
+   },
+   {
+    "year": 2022,
+    "n": 156431
+   },
+   {
+    "year": 2023,
+    "n": 157821
+   },
+   {
+    "year": 2024,
+    "n": 161659
+   },
+   {
+    "year": 2025,
+    "n": 159387
+   }
+  ]
+ },
+ "claims": {
+  "window": "year of loss 2015-2024",
+  "n_paid": 4475,
+  "median_paid": 20798,
+  "q1": 7184,
+  "q3": 56551,
+  "dollars": "nominal",
+  "median_paid_2024usd": 24969,
+  "top_events": [
+   {
+    "name": "Hurricane Irma",
+    "n": 1977,
+    "share": 0.442
+   },
+   {
+    "name": "June South Florida Flooding",
+    "n": 607,
+    "share": 0.136
+   },
+   {
+    "name": "Hurricane Eta",
+    "n": 414,
+    "share": 0.093
+   },
+   {
+    "name": "Tropical Storm Alex",
+    "n": 165,
+    "share": 0.037
+   },
+   {
+    "name": "April Florida Flooding",
+    "n": 19,
+    "share": 0.004
+   }
+  ],
+  "dominant_event_share": 0.442,
+  "by_year": [
+   {
+    "year": 2015,
+    "n": 98
+   },
+   {
+    "year": 2016,
+    "n": 10
+   },
+   {
+    "year": 2017,
+    "n": 2090
+   },
+   {
+    "year": 2018,
+    "n": 9
+   },
+   {
+    "year": 2019,
+    "n": 148
+   },
+   {
+    "year": 2020,
+    "n": 1085
+   },
+   {
+    "year": 2021,
+    "n": 14
+   },
+   {
+    "year": 2022,
+    "n": 212
+   },
+   {
+    "year": 2023,
+    "n": 176
+   },
+   {
+    "year": 2024,
+    "n": 633
+   }
+  ]
+ },
+ "declarations": {
+  "since": 2000,
+  "n_total": 21,
+  "by_incident_type": {
+   "Flood": 0,
+   "Hurricane": 17,
+   "Severe Storm": 4
+  },
+  "major_only": 11,
+  "latest": [
+   {
+    "id": "DR-4834",
+    "title": "HURRICANE MILTON",
+    "incident_type": "Hurricane",
+    "date": "2024-10-11"
+   },
+   {
+    "id": "EM-3622",
+    "title": "HURRICANE MILTON",
+    "incident_type": "Hurricane",
+    "date": "2024-10-07"
+   },
+   {
+    "id": "DR-4680",
+    "title": "HURRICANE NICOLE",
+    "incident_type": "Hurricane",
+    "date": "2022-12-13"
+   },
+   {
+    "id": "DR-4673",
+    "title": "HURRICANE IAN",
+    "incident_type": "Hurricane",
+    "date": "2022-09-29"
+   },
+   {
+    "id": "EM-3584",
+    "title": "TROPICAL STORM IAN",
+    "incident_type": "Hurricane",
+    "date": "2022-09-24"
+   }
+  ]
+ },
+ "owners_assistance": {
+  "since": 2002,
+  "n_inspected": 162835,
+  "damage_bands": [
+   {
+    "band": "No FEMA-inspected damage",
+    "n": 49349
+   },
+   {
+    "band": "$1-$10,000",
+    "n": 111649
+   },
+   {
+    "band": "$10,001-$20,000",
+    "n": 1389
+   },
+   {
+    "band": "$20,001-$30,000",
+    "n": 246
+   },
+   {
+    "band": "More than $30,000",
+    "n": 202
+   }
+  ],
+  "top_disasters": [
+   {
+    "id": "DR-1609",
+    "n": 84661,
+    "title": "HURRICANE WILMA",
+    "date": "2005-10-24"
+   },
+   {
+    "id": "DR-4337",
+    "n": 72258,
+    "title": "HURRICANE IRMA",
+    "date": "2017-09-10"
+   },
+   {
+    "id": "DR-1545",
+    "n": 4228,
+    "title": "HURRICANE FRANCES",
+    "date": "2004-09-04"
+   },
+   {
+    "id": "DR-1460",
+    "n": 1664,
+    "title": "SEVERE STORMS AND TORNADOES",
+    "date": "2003-04-25"
+   },
+   {
+    "id": "EM-3560",
+    "n": 24,
+    "title": "SURFSIDE BUILDING COLLAPSE",
+    "date": "2021-06-25"
+   }
+  ]
+ },
+ "compare": {
+  "peers": {
+   "family": "counties",
+   "n": 339
+  },
+  "values": {
+   "policies": 159388,
+   "median_premium": 876,
+   "paid_claims": 4475,
+   "median_paid": 20798,
+   "declarations": 21,
+   "owners_over_30k_share": 0.001
+  },
+  "rank_in_family": {
+   "policies": {
+    "rank": 2,
+    "of": 339
+   },
+   "median_premium": {
+    "rank": 264,
+    "of": 339
+   },
+   "paid_claims": {
+    "rank": 22,
+    "of": 339
+   },
+   "median_paid": {
+    "rank": 151,
+    "of": 339
+   },
+   "declarations": {
+    "rank": 61,
+    "of": 339
+   },
+   "owners_over_30k_share": {
+    "rank": 304,
+    "of": 339
+   }
+  },
+  "national": {
+   "median_premium": 1055,
+   "median_paid": 37248,
+   "owners_over_30k_share": 0.026
+  },
+  "gaps": {
+   "median_premium": {
+    "national": {
+     "ref": 1055,
+     "diff": -179,
+     "rel": -0.17
+    },
+    "state": {
+     "ref": 1002,
+     "diff": -126,
+     "rel": -0.126
+    }
+   },
+   "median_paid": {
+    "national": {
+     "ref": 37248,
+     "diff": -16450,
+     "rel": -0.442
+    },
+    "state": {
+     "ref": 57176,
+     "diff": -36378,
+     "rel": -0.636
+    }
+   },
+   "owners_over_30k_share": {
+    "national": {
+     "ref": 0.026,
+     "diff": -0.025,
+     "rel": -0.962
+    },
+    "state": {
+     "ref": 0.017,
+     "diff": -0.016,
+     "rel": -0.941
+    }
+   },
+   "declarations": {
+    "state_counties": {
+     "ref": 22,
+     "diff": -1,
+     "rel": -0.045
+    }
+   }
+  },
+  "rank_in_state": {
+   "policies": {
+    "rank": 1,
+    "of": 43
+   },
+   "median_premium": {
+    "rank": 31,
+    "of": 43
+   },
+   "paid_claims": {
+    "rank": 13,
+    "of": 43
+   },
+   "median_paid": {
+    "rank": 31,
+    "of": 43
+   },
+   "declarations": {
+    "rank": 24,
+    "of": 43
+   },
+   "owners_over_30k_share": {
+    "rank": 43,
+    "of": 43
+   }
+  },
+  "state": {
+   "median_premium": 1002,
+   "median_paid": 57176,
+   "owners_over_30k_share": 0.017,
+   "counties": 43,
+   "declarations_county_median": 22
+  }
+ },
+ "community_status": {
+  "n": 35,
+  "participating": 35,
+  "crs_classed": 27,
+  "share_classed": 0.771,
+  "best_class": 3,
+  "best_class_communities": [
+   "CUTLER BAY, TOWN OF",
+   "MIAMI-DADE COUNTY*"
+  ],
+  "oldest_current_map": null,
+  "sanctioned": 0,
+  "suspended": 0,
+  "withdrawn": 0,
+  "not_participating": 0,
+  "communities": [
+   {
+    "id": "120218",
+    "name": "CUTLER BAY, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 3,
+    "sfha_discount_pct": 35,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2027-02-19",
+    "current_map_code": ">",
+    "first_firm": "1972-09-29",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120635",
+    "name": "MIAMI-DADE COUNTY*",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 3,
+    "sfha_discount_pct": 35,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2027-02-19",
+    "current_map_code": ">",
+    "first_firm": "1972-09-29",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120639",
+    "name": "CORAL GABLES, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 5,
+    "sfha_discount_pct": 25,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2027-02-19",
+    "current_map_code": ">",
+    "first_firm": "1972-09-29",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120651",
+    "name": "MIAMI BEACH, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 5,
+    "sfha_discount_pct": 25,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2027-02-19",
+    "current_map_code": ">",
+    "first_firm": "1972-09-29",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120687",
+    "name": "PALMETTO BAY, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 5,
+    "sfha_discount_pct": 25,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2027-02-19",
+    "current_map_code": ">",
+    "first_firm": "1972-09-29",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120676",
+    "name": "AVENTURA, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 6,
+    "sfha_discount_pct": 20,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2027-02-19",
+    "current_map_code": ">",
+    "first_firm": "1972-09-29",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120041",
+    "name": "DORAL, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 6,
+    "sfha_discount_pct": 20,
+    "non_sfha_discount_pct": 10,
+    "current_map": null,
+    "current_map_code": "NSFHA",
+    "first_firm": "1972-09-29",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120686",
+    "name": "MIAMI LAKES, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 6,
+    "sfha_discount_pct": 20,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2027-02-19",
+    "current_map_code": ">",
+    "first_firm": "1972-09-29",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120652",
+    "name": "MIAMI SHORES VILLAGE,  VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 6,
+    "sfha_discount_pct": 20,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2027-02-19",
+    "current_map_code": ">",
+    "first_firm": "1972-09-29",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120650",
+    "name": "MIAMI, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 6,
+    "sfha_discount_pct": 20,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2027-02-19",
+    "current_map_code": ">",
+    "first_firm": "1972-09-29",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120655",
+    "name": "NORTH MIAMI, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 6,
+    "sfha_discount_pct": 20,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2027-02-19",
+    "current_map_code": ">",
+    "first_firm": "1972-09-29",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120658",
+    "name": "SOUTH MIAMI, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 6,
+    "sfha_discount_pct": 20,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2027-02-19",
+    "current_map_code": ">",
+    "first_firm": "1972-09-29",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120659",
+    "name": "SURFSIDE, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 6,
+    "sfha_discount_pct": 20,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2027-02-19",
+    "current_map_code": ">",
+    "first_firm": "1972-09-29",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120643",
+    "name": "HIALEAH, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 7,
+    "sfha_discount_pct": 15,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2027-02-19",
+    "current_map_code": ">",
+    "first_firm": "1972-09-29",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120645",
+    "name": "HOMESTEAD, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 7,
+    "sfha_discount_pct": 15,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2027-02-19",
+    "current_map_code": ">",
+    "first_firm": "1972-09-29",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120345",
+    "name": "MIAMI GARDENS, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 7,
+    "sfha_discount_pct": 15,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2027-02-19",
+    "current_map_code": ">",
+    "first_firm": "1972-09-29",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120656",
+    "name": "NORTH MIAMI BEACH, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 7,
+    "sfha_discount_pct": 15,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2027-02-19",
+    "current_map_code": ">",
+    "first_firm": "1972-09-29",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120425",
+    "name": "PINECREST, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 7,
+    "sfha_discount_pct": 15,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2027-02-19",
+    "current_map_code": ">",
+    "first_firm": "1972-09-29",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120688",
+    "name": "SUNNY ISLES BEACH, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 7,
+    "sfha_discount_pct": 15,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2027-02-19",
+    "current_map_code": ">",
+    "first_firm": "1972-09-29",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120636",
+    "name": "BAL HARBOUR VILLAGE, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 8,
+    "sfha_discount_pct": 10,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2027-02-19",
+    "current_map_code": ">",
+    "first_firm": "1972-09-29",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120648",
+    "name": "KEY BISCAYNE, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 8,
+    "sfha_discount_pct": 10,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2027-02-19",
+    "current_map_code": ">",
+    "first_firm": "1972-09-29",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120654",
+    "name": "NORTH BAY VILLAGE, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 8,
+    "sfha_discount_pct": 10,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2027-02-19",
+    "current_map_code": ">",
+    "first_firm": "1972-09-29",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120637",
+    "name": "BAY HARBOR ISLANDS, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 9,
+    "sfha_discount_pct": 5,
+    "non_sfha_discount_pct": 5,
+    "current_map": null,
+    "current_map_code": "NSFHA",
+    "first_firm": "1972-09-29",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120649",
+    "name": "MEDLEY, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 9,
+    "sfha_discount_pct": 5,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2027-02-19",
+    "current_map_code": ">",
+    "first_firm": "1972-09-29",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120638",
+    "name": "BISCAYNE PARK, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 10,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": 0,
+    "current_map": "2027-02-19",
+    "current_map_code": ">",
+    "first_firm": "1972-09-29",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120642",
+    "name": "GOLDEN BEACH, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 10,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": 0,
+    "current_map": "2027-02-19",
+    "current_map_code": ">",
+    "first_firm": "1972-09-29",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120657",
+    "name": "OPA-LOCKA, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 10,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": 0,
+    "current_map": "2027-02-19",
+    "current_map_code": ">",
+    "first_firm": "1972-09-29",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120640",
+    "name": "EL PORTAL, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2027-02-19",
+    "current_map_code": ">",
+    "first_firm": "1972-09-29",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120641",
+    "name": "FLORIDA CITY, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2027-02-19",
+    "current_map_code": ">",
+    "first_firm": "1972-09-29",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120644",
+    "name": "HIALEAH GARDENS, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2027-02-19",
+    "current_map_code": ">",
+    "first_firm": "1972-09-29",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120646",
+    "name": "INDIAN CREEK VILLAGE, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2027-02-19",
+    "current_map_code": ">",
+    "first_firm": "1972-09-29",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120653",
+    "name": "MIAMI SPRINGS, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2027-02-19",
+    "current_map_code": ">",
+    "first_firm": "1972-09-29",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120660",
+    "name": "SWEETWATER, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2027-02-19",
+    "current_map_code": ">",
+    "first_firm": "1972-09-29",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120661",
+    "name": "VIRGINIA GARDENS, VILLAGE OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2027-02-19",
+    "current_map_code": ">",
+    "first_firm": "1972-09-29",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "120662",
+    "name": "WEST MIAMI, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2027-02-19",
+    "current_map_code": ">",
+    "first_firm": "1972-09-29",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   }
+  ],
+  "multi_county_communities": [],
+  "state_join_share": 0.01
+ }
+}

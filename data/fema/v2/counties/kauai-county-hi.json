@@ -1,0 +1,466 @@
+{
+ "id": "15007",
+ "kind": "county",
+ "name": "Kauai County",
+ "state": "HI",
+ "slug": "kauai-county-hi",
+ "generated_at": "2026-10-12T13:15:44Z",
+ "sources": [
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-11",
+   "filter": "policyEffectiveDate ge '2025-01-01' and lt '2026-01-01', per propertyState (rows downloaded, every occupancy; residential and policyCost > 0 kept locally)"
+  },
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "$inlinecount per year 2019-2025: propertyState eq '<ST>' and occupancyType in (1,2,3,11,12,13,14) [and startswith(censusGeoid,'<county FIPS>')]"
+  },
+  {
+   "dataset": "NfipClaims",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipClaims",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "yearOfLoss eq <year> and amountPaidOnBuildingClaim gt 0 (one request per year)"
+  },
+  {
+   "dataset": "CPI-U, U.S. city average, all items (CUUR0000SA0), annual average",
+   "version": "BLS Public Data API v1",
+   "api": "https://api.bls.gov/publicAPI/v1/timeseries/data/",
+   "as_of": "annual averages 2005-2025",
+   "accessed_at": "2026-10-12",
+   "filter": "period M13"
+  },
+  {
+   "dataset": "DisasterDeclarationsSummaries",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/DisasterDeclarationsSummaries",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows); declarationType DR or EM, incidentType Flood, Hurricane, Severe Storm, Severe Storm(s), declarationDate >= 2000 kept locally"
+  },
+  {
+   "dataset": "HousingAssistanceOwners",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/HousingAssistanceOwners",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows)"
+  },
+  {
+   "dataset": "NfipCommunityStatusBook",
+   "version": "v1",
+   "api": "https://www.fema.gov/api/open/v1/NfipCommunityStatusBook",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "all rows; community -> county on the `county` text field"
+  }
+ ],
+ "notes": [
+  "FEMA field definition (NfipPolicies v3, policyCost): \"Calculated in dollars by adding together calculated premium, reserve fund assessment, federal policy fee, and HFIAA surcharge\"",
+  "FEMA field definition (NfipPolicies v3, totalInsurancePremiumOfThePolicy): \"Total Insurance Premium of the Policy in whole dollars. Negative values indicate a refund.\"; policyCost is used because it is what the policyholder pays; policyCost < totalInsurancePremiumOfThePolicy on 0 of 3117116 kept residential policies.",
+  "Premiums: one row = one policy term effective in 2025 (NFIP only, no private insurance); median and quartiles are Hyndman-Fan type 7, rounded half up to the dollar; a cell (State, zone, zone group, county) is published only when n >= 100.",
+  "Flood zones: ratedFloodZone grouped as A1-A30 -> AE, V1-V30 -> VE, B/C/X -> X, AOB -> AO, AHB -> AH, AR* -> AR; zone D and unknown zones are left out of the zone tables.",
+  "policies_trend: residential policy terms per year counted by the API ($inlinecount), all premiums included (policyCost <= 0 too), so the 2025 count can differ from premiums.n (county: the API count also filters propertyState, premiums.n does not).",
+  "Claims: amounts paid by NFIP on building claims (amountPaidOnBuildingClaim > 0), not repair costs; nominal dollars; median_paid_2024usd deflates each claim by its yearOfLoss with CPI-U annual averages (same series and method as nfip-paid-claims-by-state); NfipClaims asOfDate 2026-09-08.",
+  "Declarations: administrative decisions, not measured damage; scope = Flood, Hurricane, Severe Storm, Severe Storm(s), major disaster (DR) and emergency (EM), declared since 2000, counted once per disaster number.",
+  "Owners assistance: FEMA inspections of owner applicants to the Individuals and Households Program (inspected damage bands, not insurance claims or grants); NFIP and IHP figures measure different populations and are never added.",
+  "This product uses the Federal Emergency Management Agency’s OpenFEMA API, but is not endorsed by FEMA. The Federal Government or FEMA cannot vouch for the data or analyses derived from these data after the data have been retrieved from the Agency's website(s).",
+  "County of a policy = first 5 digits of censusGeoid (block group of the address); county of a claim = countyCode. FEMA: \"the County Code field may not reflect the individual county the property is located\".",
+  "Dominant event: Hurricane Lane = 0.012 of paid claims 2015-2024.",
+  "Owners assistance: HousingAssistanceOwners has no FIPS field; rows joined on the county text (DDS designatedArea, then Census 2020 name). HA: \"the applicant has the right to choose the county\"."
+ ],
+ "premiums": {
+  "window": "policies effective 2025",
+  "occupancy": "residential (occupancyType 1,2,3,11,12,13,14)",
+  "field": "policyCost",
+  "n": 1376,
+  "median": 1372,
+  "q1": 1084,
+  "q3": 2709,
+  "by_zone_group": [
+   {
+    "group": "SFHA (A, AE, AH, AO, AR, A99, V, VE)",
+    "n": 1017,
+    "median": 1770,
+    "q1": 1127,
+    "q3": 3093
+   },
+   {
+    "group": "Outside SFHA (X, B, C)",
+    "n": 359,
+    "median": 1217,
+    "q1": 1079,
+    "q3": 1309
+   }
+  ],
+  "by_zone": [
+   {
+    "zone": "AE",
+    "n": 685,
+    "median": 1477,
+    "q1": 1073,
+    "q3": 2610
+   },
+   {
+    "zone": "X",
+    "n": 359,
+    "median": 1217,
+    "q1": 1079,
+    "q3": 1309
+   },
+   {
+    "zone": "VE",
+    "n": 166,
+    "median": 3615,
+    "q1": 2559,
+    "q3": 4767
+   },
+   {
+    "zone": "AH",
+    "n": 144,
+    "median": 1970,
+    "q1": 1084,
+    "q3": 2857
+   }
+  ],
+  "policies_trend": [
+   {
+    "year": 2019,
+    "n": 2114
+   },
+   {
+    "year": 2020,
+    "n": 2046
+   },
+   {
+    "year": 2021,
+    "n": 1987
+   },
+   {
+    "year": 2022,
+    "n": 1591
+   },
+   {
+    "year": 2023,
+    "n": 1427
+   },
+   {
+    "year": 2024,
+    "n": 1395
+   },
+   {
+    "year": 2025,
+    "n": 1376
+   }
+  ]
+ },
+ "claims": {
+  "window": "year of loss 2015-2024",
+  "n_paid": 258,
+  "median_paid": 20847,
+  "q1": 6267,
+  "q3": 56606,
+  "dollars": "nominal",
+  "median_paid_2024usd": 24460,
+  "top_events": [
+   {
+    "name": "Hurricane Lane",
+    "n": 3,
+    "share": 0.012
+   }
+  ],
+  "dominant_event_share": 0.012,
+  "by_year": [
+   {
+    "year": 2015,
+    "n": 0
+   },
+   {
+    "year": 2016,
+    "n": 1
+   },
+   {
+    "year": 2017,
+    "n": 2
+   },
+   {
+    "year": 2018,
+    "n": 164
+   },
+   {
+    "year": 2019,
+    "n": 6
+   },
+   {
+    "year": 2020,
+    "n": 23
+   },
+   {
+    "year": 2021,
+    "n": 7
+   },
+   {
+    "year": 2022,
+    "n": 0
+   },
+   {
+    "year": 2023,
+    "n": 0
+   },
+   {
+    "year": 2024,
+    "n": 55
+   }
+  ]
+ },
+ "declarations": {
+  "since": 2000,
+  "n_total": 12,
+  "by_incident_type": {
+   "Flood": 3,
+   "Hurricane": 5,
+   "Severe Storm": 4
+  },
+  "major_only": 9,
+  "latest": [
+   {
+    "id": "DR-4952",
+    "title": "HURRICANE LOWELL",
+    "incident_type": "Hurricane",
+    "date": "2026-10-07"
+   },
+   {
+    "id": "DR-4793",
+    "title": "SEVERE STORMS, FLOODING, AND LANDSLIDES",
+    "incident_type": "Flood",
+    "date": "2024-06-17"
+   },
+   {
+    "id": "EM-3529",
+    "title": "HURRICANE DOUGLAS",
+    "incident_type": "Hurricane",
+    "date": "2020-07-25"
+   },
+   {
+    "id": "DR-4549",
+    "title": "SEVERE STORMS AND FLOODING",
+    "incident_type": "Severe Storm",
+    "date": "2020-07-09"
+   },
+   {
+    "id": "DR-4395",
+    "title": "HURRICANE LANE",
+    "incident_type": "Hurricane",
+    "date": "2018-09-27"
+   }
+  ]
+ },
+ "owners_assistance": {
+  "since": 2002,
+  "n_inspected": 225,
+  "damage_bands": [
+   {
+    "band": "No FEMA-inspected damage",
+    "n": 40
+   },
+   {
+    "band": "$1-$10,000",
+    "n": 156
+   },
+   {
+    "band": "$10,001-$20,000",
+    "n": 21
+   },
+   {
+    "band": "$20,001-$30,000",
+    "n": 4
+   },
+   {
+    "band": "More than $30,000",
+    "n": 4
+   }
+  ],
+  "top_disasters": [
+   {
+    "id": "DR-4365",
+    "n": 152,
+    "title": "SEVERE STORMS, FLOODING, LANDSLIDES, AND MUDSLIDES",
+    "date": "2018-05-08"
+   },
+   {
+    "id": "DR-1640",
+    "n": 73,
+    "title": "SEVERE STORMS, FLOODING, LANDSLIDES, AND MUDSLIDES",
+    "date": "2006-05-02"
+   }
+  ]
+ },
+ "compare": {
+  "peers": {
+   "family": "counties",
+   "n": 339
+  },
+  "values": {
+   "policies": 1376,
+   "median_premium": 1372,
+   "paid_claims": 258,
+   "median_paid": 20847,
+   "declarations": 12,
+   "owners_over_30k_share": 0.018
+  },
+  "rank_in_family": {
+   "policies": {
+    "rank": 195,
+    "of": 339
+   },
+   "median_premium": {
+    "rank": 32,
+    "of": 339
+   },
+   "paid_claims": {
+    "rank": 186,
+    "of": 339
+   },
+   "median_paid": {
+    "rank": 149,
+    "of": 339
+   },
+   "declarations": {
+    "rank": 208,
+    "of": 339
+   },
+   "owners_over_30k_share": {
+    "rank": 149,
+    "of": 339
+   }
+  },
+  "national": {
+   "median_premium": 1055,
+   "median_paid": 37248,
+   "owners_over_30k_share": 0.026
+  },
+  "gaps": {
+   "median_premium": {
+    "national": {
+     "ref": 1055,
+     "diff": 317,
+     "rel": 0.3
+    },
+    "state": {
+     "ref": 1404,
+     "diff": -32,
+     "rel": -0.023
+    }
+   },
+   "median_paid": {
+    "national": {
+     "ref": 37248,
+     "diff": -16401,
+     "rel": -0.44
+    },
+    "state": {
+     "ref": 28325,
+     "diff": -7478,
+     "rel": -0.264
+    }
+   },
+   "owners_over_30k_share": {
+    "national": {
+     "ref": 0.026,
+     "diff": -0.008,
+     "rel": -0.308
+    },
+    "state": {
+     "ref": 0.084,
+     "diff": -0.066,
+     "rel": -0.786
+    }
+   },
+   "declarations": {
+    "state_counties": {
+     "ref": 11,
+     "diff": 1,
+     "rel": 0.091
+    }
+   }
+  },
+  "rank_in_state": {
+   "policies": {
+    "rank": 2,
+    "of": 2
+   },
+   "median_premium": {
+    "rank": 2,
+    "of": 2
+   },
+   "paid_claims": {
+    "rank": 2,
+    "of": 2
+   },
+   "median_paid": {
+    "rank": 2,
+    "of": 2
+   },
+   "declarations": {
+    "rank": 1,
+    "of": 2
+   },
+   "owners_over_30k_share": {
+    "rank": 2,
+    "of": 2
+   }
+  },
+  "state": {
+   "median_premium": 1404,
+   "median_paid": 28325,
+   "owners_over_30k_share": 0.084,
+   "counties": 2,
+   "declarations_county_median": 11
+  }
+ },
+ "community_status": {
+  "n": 1,
+  "participating": 1,
+  "crs_classed": 1,
+  "share_classed": 1.0,
+  "best_class": 8,
+  "best_class_communities": [
+   "KAUAI COUNTY*"
+  ],
+  "oldest_current_map": {
+   "date": "2021-02-26",
+   "community": "KAUAI COUNTY*"
+  },
+  "sanctioned": 0,
+  "suspended": 0,
+  "withdrawn": 0,
+  "not_participating": 0,
+  "communities": [
+   {
+    "id": "150002",
+    "name": "KAUAI COUNTY*",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 8,
+    "sfha_discount_pct": 10,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2021-02-26",
+    "current_map_code": null,
+    "first_firm": "1981-11-04",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   }
+  ],
+  "multi_county_communities": [],
+  "state_join_share": 0.0
+ }
+}

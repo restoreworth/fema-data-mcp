@@ -1,0 +1,580 @@
+{
+ "id": "22101",
+ "kind": "county",
+ "name": "St. Mary Parish",
+ "state": "LA",
+ "slug": "st-mary-parish-la",
+ "generated_at": "2026-10-12T13:15:44Z",
+ "sources": [
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-11",
+   "filter": "policyEffectiveDate ge '2025-01-01' and lt '2026-01-01', per propertyState (rows downloaded, every occupancy; residential and policyCost > 0 kept locally)"
+  },
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "$inlinecount per year 2019-2025: propertyState eq '<ST>' and occupancyType in (1,2,3,11,12,13,14) [and startswith(censusGeoid,'<county FIPS>')]"
+  },
+  {
+   "dataset": "NfipClaims",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipClaims",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "yearOfLoss eq <year> and amountPaidOnBuildingClaim gt 0 (one request per year)"
+  },
+  {
+   "dataset": "CPI-U, U.S. city average, all items (CUUR0000SA0), annual average",
+   "version": "BLS Public Data API v1",
+   "api": "https://api.bls.gov/publicAPI/v1/timeseries/data/",
+   "as_of": "annual averages 2005-2025",
+   "accessed_at": "2026-10-12",
+   "filter": "period M13"
+  },
+  {
+   "dataset": "DisasterDeclarationsSummaries",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/DisasterDeclarationsSummaries",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows); declarationType DR or EM, incidentType Flood, Hurricane, Severe Storm, Severe Storm(s), declarationDate >= 2000 kept locally"
+  },
+  {
+   "dataset": "HousingAssistanceOwners",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/HousingAssistanceOwners",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows)"
+  },
+  {
+   "dataset": "NfipCommunityStatusBook",
+   "version": "v1",
+   "api": "https://www.fema.gov/api/open/v1/NfipCommunityStatusBook",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "all rows; community -> county on the `county` text field"
+  }
+ ],
+ "notes": [
+  "FEMA field definition (NfipPolicies v3, policyCost): \"Calculated in dollars by adding together calculated premium, reserve fund assessment, federal policy fee, and HFIAA surcharge\"",
+  "FEMA field definition (NfipPolicies v3, totalInsurancePremiumOfThePolicy): \"Total Insurance Premium of the Policy in whole dollars. Negative values indicate a refund.\"; policyCost is used because it is what the policyholder pays; policyCost < totalInsurancePremiumOfThePolicy on 0 of 3117116 kept residential policies.",
+  "Premiums: one row = one policy term effective in 2025 (NFIP only, no private insurance); median and quartiles are Hyndman-Fan type 7, rounded half up to the dollar; a cell (State, zone, zone group, county) is published only when n >= 100.",
+  "Flood zones: ratedFloodZone grouped as A1-A30 -> AE, V1-V30 -> VE, B/C/X -> X, AOB -> AO, AHB -> AH, AR* -> AR; zone D and unknown zones are left out of the zone tables.",
+  "policies_trend: residential policy terms per year counted by the API ($inlinecount), all premiums included (policyCost <= 0 too), so the 2025 count can differ from premiums.n (county: the API count also filters propertyState, premiums.n does not).",
+  "Claims: amounts paid by NFIP on building claims (amountPaidOnBuildingClaim > 0), not repair costs; nominal dollars; median_paid_2024usd deflates each claim by its yearOfLoss with CPI-U annual averages (same series and method as nfip-paid-claims-by-state); NfipClaims asOfDate 2026-09-08.",
+  "Declarations: administrative decisions, not measured damage; scope = Flood, Hurricane, Severe Storm, Severe Storm(s), major disaster (DR) and emergency (EM), declared since 2000, counted once per disaster number.",
+  "Owners assistance: FEMA inspections of owner applicants to the Individuals and Households Program (inspected damage bands, not insurance claims or grants); NFIP and IHP figures measure different populations and are never added.",
+  "This product uses the Federal Emergency Management Agency’s OpenFEMA API, but is not endorsed by FEMA. The Federal Government or FEMA cannot vouch for the data or analyses derived from these data after the data have been retrieved from the Agency's website(s).",
+  "County of a policy = first 5 digits of censusGeoid (block group of the address); county of a claim = countyCode. FEMA: \"the County Code field may not reflect the individual county the property is located\".",
+  "Dominant event: Hurricane Francine = 0.39 of paid claims 2015-2024.",
+  "Owners assistance: HousingAssistanceOwners has no FIPS field; rows joined on the county text (DDS designatedArea, then Census 2020 name). HA: \"the applicant has the right to choose the county\"."
+ ],
+ "premiums": {
+  "window": "policies effective 2025",
+  "occupancy": "residential (occupancyType 1,2,3,11,12,13,14)",
+  "field": "policyCost",
+  "n": 2710,
+  "median": 1139,
+  "q1": 1042,
+  "q3": 2098,
+  "by_zone_group": [
+   {
+    "group": "SFHA (A, AE, AH, AO, AR, A99, V, VE)",
+    "n": 1552,
+    "median": 1884,
+    "q1": 1219,
+    "q3": 2681
+   },
+   {
+    "group": "Outside SFHA (X, B, C)",
+    "n": 1158,
+    "median": 1079,
+    "q1": 965,
+    "q3": 1095
+   }
+  ],
+  "by_zone": [
+   {
+    "zone": "AE",
+    "n": 1320,
+    "median": 1935,
+    "q1": 1270,
+    "q3": 2663
+   },
+   {
+    "zone": "X",
+    "n": 1158,
+    "median": 1079,
+    "q1": 965,
+    "q3": 1095
+   }
+  ],
+  "policies_trend": [
+   {
+    "year": 2019,
+    "n": 4257
+   },
+   {
+    "year": 2020,
+    "n": 4182
+   },
+   {
+    "year": 2021,
+    "n": 4029
+   },
+   {
+    "year": 2022,
+    "n": 3696
+   },
+   {
+    "year": 2023,
+    "n": 3275
+   },
+   {
+    "year": 2024,
+    "n": 2931
+   },
+   {
+    "year": 2025,
+    "n": 2710
+   }
+  ]
+ },
+ "claims": {
+  "window": "year of loss 2015-2024",
+  "n_paid": 246,
+  "median_paid": 26919,
+  "q1": 8849,
+  "q3": 49718,
+  "dollars": "nominal",
+  "median_paid_2024usd": 29777,
+  "top_events": [
+   {
+    "name": "Hurricane Francine",
+    "n": 96,
+    "share": 0.39
+   },
+   {
+    "name": "Tropical Storm Barry",
+    "n": 35,
+    "share": 0.142
+   },
+   {
+    "name": "Hurricane Laura",
+    "n": 20,
+    "share": 0.081
+   },
+   {
+    "name": "Hurricane Delta",
+    "n": 18,
+    "share": 0.073
+   },
+   {
+    "name": "Mid-summer severe storms",
+    "n": 2,
+    "share": 0.008
+   }
+  ],
+  "dominant_event_share": 0.39,
+  "by_year": [
+   {
+    "year": 2015,
+    "n": 6
+   },
+   {
+    "year": 2016,
+    "n": 5
+   },
+   {
+    "year": 2017,
+    "n": 16
+   },
+   {
+    "year": 2018,
+    "n": 0
+   },
+   {
+    "year": 2019,
+    "n": 74
+   },
+   {
+    "year": 2020,
+    "n": 40
+   },
+   {
+    "year": 2021,
+    "n": 6
+   },
+   {
+    "year": 2022,
+    "n": 0
+   },
+   {
+    "year": 2023,
+    "n": 1
+   },
+   {
+    "year": 2024,
+    "n": 98
+   }
+  ]
+ },
+ "declarations": {
+  "since": 2000,
+  "n_total": 30,
+  "by_incident_type": {
+   "Flood": 5,
+   "Hurricane": 25,
+   "Severe Storm": 0
+  },
+  "major_only": 16,
+  "latest": [
+   {
+    "id": "DR-4817",
+    "title": "HURRICANE FRANCINE",
+    "incident_type": "Hurricane",
+    "date": "2024-09-16"
+   },
+   {
+    "id": "EM-3614",
+    "title": "TROPICAL STORM FRANCINE",
+    "incident_type": "Hurricane",
+    "date": "2024-09-10"
+   },
+   {
+    "id": "DR-4611",
+    "title": "HURRICANE IDA",
+    "incident_type": "Hurricane",
+    "date": "2021-08-29"
+   },
+   {
+    "id": "EM-3568",
+    "title": "TROPICAL STORM IDA",
+    "incident_type": "Hurricane",
+    "date": "2021-08-27"
+   },
+   {
+    "id": "DR-4577",
+    "title": "HURRICANE ZETA",
+    "incident_type": "Hurricane",
+    "date": "2021-01-12"
+   }
+  ]
+ },
+ "owners_assistance": {
+  "since": 2002,
+  "n_inspected": 16702,
+  "damage_bands": [
+   {
+    "band": "No FEMA-inspected damage",
+    "n": 4659
+   },
+   {
+    "band": "$1-$10,000",
+    "n": 11206
+   },
+   {
+    "band": "$10,001-$20,000",
+    "n": 623
+   },
+   {
+    "band": "$20,001-$30,000",
+    "n": 101
+   },
+   {
+    "band": "More than $30,000",
+    "n": 113
+   }
+  ],
+  "top_disasters": [
+   {
+    "id": "DR-1607",
+    "n": 3911,
+    "title": "HURRICANE RITA",
+    "date": "2005-09-24"
+   },
+   {
+    "id": "DR-1786",
+    "n": 3431,
+    "title": "HURRICANE GUSTAV",
+    "date": "2008-09-02"
+   },
+   {
+    "id": "DR-4817",
+    "n": 3175,
+    "title": "HURRICANE FRANCINE",
+    "date": "2024-09-16"
+   },
+   {
+    "id": "DR-4611",
+    "n": 2154,
+    "title": "HURRICANE IDA",
+    "date": "2021-08-29"
+   },
+   {
+    "id": "DR-1603",
+    "n": 1573,
+    "title": "HURRICANE KATRINA",
+    "date": "2005-08-29"
+   }
+  ]
+ },
+ "compare": {
+  "peers": {
+   "family": "counties",
+   "n": 339
+  },
+  "values": {
+   "policies": 2710,
+   "median_premium": 1139,
+   "paid_claims": 246,
+   "median_paid": 26919,
+   "declarations": 30,
+   "owners_over_30k_share": 0.007
+  },
+  "rank_in_family": {
+   "policies": {
+    "rank": 141,
+    "of": 339
+   },
+   "median_premium": {
+    "rank": 112,
+    "of": 339
+   },
+   "paid_claims": {
+    "rank": 196,
+    "of": 339
+   },
+   "median_paid": {
+    "rank": 106,
+    "of": 339
+   },
+   "declarations": {
+    "rank": 3,
+    "of": 339
+   },
+   "owners_over_30k_share": {
+    "rank": 226,
+    "of": 339
+   }
+  },
+  "national": {
+   "median_premium": 1055,
+   "median_paid": 37248,
+   "owners_over_30k_share": 0.026
+  },
+  "gaps": {
+   "median_premium": {
+    "national": {
+     "ref": 1055,
+     "diff": 84,
+     "rel": 0.08
+    },
+    "state": {
+     "ref": 1079,
+     "diff": 60,
+     "rel": 0.056
+    }
+   },
+   "median_paid": {
+    "national": {
+     "ref": 37248,
+     "diff": -10329,
+     "rel": -0.277
+    },
+    "state": {
+     "ref": 52212,
+     "diff": -25293,
+     "rel": -0.484
+    }
+   },
+   "owners_over_30k_share": {
+    "national": {
+     "ref": 0.026,
+     "diff": -0.019,
+     "rel": -0.731
+    },
+    "state": {
+     "ref": 0.048,
+     "diff": -0.041,
+     "rel": -0.854
+    }
+   },
+   "declarations": {
+    "state_counties": {
+     "ref": 26,
+     "diff": 4,
+     "rel": 0.154
+    }
+   }
+  },
+  "rank_in_state": {
+   "policies": {
+    "rank": 22,
+    "of": 38
+   },
+   "median_premium": {
+    "rank": 6,
+    "of": 38
+   },
+   "paid_claims": {
+    "rank": 26,
+    "of": 38
+   },
+   "median_paid": {
+    "rank": 20,
+    "of": 38
+   },
+   "declarations": {
+    "rank": 3,
+    "of": 38
+   },
+   "owners_over_30k_share": {
+    "rank": 32,
+    "of": 38
+   }
+  },
+  "state": {
+   "median_premium": 1079,
+   "median_paid": 52212,
+   "owners_over_30k_share": 0.048,
+   "counties": 38,
+   "declarations_county_median": 26
+  }
+ },
+ "community_status": {
+  "n": 7,
+  "participating": 7,
+  "crs_classed": 1,
+  "share_classed": 0.143,
+  "best_class": 9,
+  "best_class_communities": [
+   "MORGAN CITY, CITY OF"
+  ],
+  "oldest_current_map": {
+   "date": "2017-04-19",
+   "community": "MORGAN CITY, CITY OF"
+  },
+  "sanctioned": 0,
+  "suspended": 0,
+  "withdrawn": 0,
+  "not_participating": 0,
+  "communities": [
+   {
+    "id": "220196",
+    "name": "MORGAN CITY, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 9,
+    "sfha_discount_pct": 5,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2017-04-19",
+    "current_map_code": null,
+    "first_firm": "1978-08-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "220193",
+    "name": "BALDWIN, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2017-04-19",
+    "current_map_code": null,
+    "first_firm": "1978-12-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "220194",
+    "name": "BERWICK, TOWN OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2017-04-19",
+    "current_map_code": null,
+    "first_firm": "1980-09-03",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "220379",
+    "name": "CHITIMACHA TRIBE OF LOUISIANA",
+    "participating": true,
+    "tribal": true,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2017-04-19",
+    "current_map_code": "M",
+    "first_firm": "1980-09-03",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "220195",
+    "name": "FRANKLIN, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2017-04-19",
+    "current_map_code": null,
+    "first_firm": "1978-09-15",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "220197",
+    "name": "PATTERSON, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2017-04-19",
+    "current_map_code": null,
+    "first_firm": "1978-07-03",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "220192",
+    "name": "ST. MARY PARISH*",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2017-04-19",
+    "current_map_code": null,
+    "first_firm": "1980-09-03",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   }
+  ],
+  "multi_county_communities": [],
+  "state_join_share": 0.023
+ }
+}

@@ -1,0 +1,467 @@
+{
+ "id": "51710",
+ "kind": "county",
+ "name": "Norfolk city",
+ "state": "VA",
+ "slug": "norfolk-city-va",
+ "generated_at": "2026-10-12T13:15:44Z",
+ "sources": [
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-11",
+   "filter": "policyEffectiveDate ge '2025-01-01' and lt '2026-01-01', per propertyState (rows downloaded, every occupancy; residential and policyCost > 0 kept locally)"
+  },
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "$inlinecount per year 2019-2025: propertyState eq '<ST>' and occupancyType in (1,2,3,11,12,13,14) [and startswith(censusGeoid,'<county FIPS>')]"
+  },
+  {
+   "dataset": "NfipClaims",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipClaims",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "yearOfLoss eq <year> and amountPaidOnBuildingClaim gt 0 (one request per year)"
+  },
+  {
+   "dataset": "CPI-U, U.S. city average, all items (CUUR0000SA0), annual average",
+   "version": "BLS Public Data API v1",
+   "api": "https://api.bls.gov/publicAPI/v1/timeseries/data/",
+   "as_of": "annual averages 2005-2025",
+   "accessed_at": "2026-10-12",
+   "filter": "period M13"
+  },
+  {
+   "dataset": "DisasterDeclarationsSummaries",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/DisasterDeclarationsSummaries",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows); declarationType DR or EM, incidentType Flood, Hurricane, Severe Storm, Severe Storm(s), declarationDate >= 2000 kept locally"
+  },
+  {
+   "dataset": "HousingAssistanceOwners",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/HousingAssistanceOwners",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows)"
+  },
+  {
+   "dataset": "NfipCommunityStatusBook",
+   "version": "v1",
+   "api": "https://www.fema.gov/api/open/v1/NfipCommunityStatusBook",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "all rows; community -> county on the `county` text field"
+  }
+ ],
+ "notes": [
+  "FEMA field definition (NfipPolicies v3, policyCost): \"Calculated in dollars by adding together calculated premium, reserve fund assessment, federal policy fee, and HFIAA surcharge\"",
+  "FEMA field definition (NfipPolicies v3, totalInsurancePremiumOfThePolicy): \"Total Insurance Premium of the Policy in whole dollars. Negative values indicate a refund.\"; policyCost is used because it is what the policyholder pays; policyCost < totalInsurancePremiumOfThePolicy on 0 of 3117116 kept residential policies.",
+  "Premiums: one row = one policy term effective in 2025 (NFIP only, no private insurance); median and quartiles are Hyndman-Fan type 7, rounded half up to the dollar; a cell (State, zone, zone group, county) is published only when n >= 100.",
+  "Flood zones: ratedFloodZone grouped as A1-A30 -> AE, V1-V30 -> VE, B/C/X -> X, AOB -> AO, AHB -> AH, AR* -> AR; zone D and unknown zones are left out of the zone tables.",
+  "policies_trend: residential policy terms per year counted by the API ($inlinecount), all premiums included (policyCost <= 0 too), so the 2025 count can differ from premiums.n (county: the API count also filters propertyState, premiums.n does not).",
+  "Claims: amounts paid by NFIP on building claims (amountPaidOnBuildingClaim > 0), not repair costs; nominal dollars; median_paid_2024usd deflates each claim by its yearOfLoss with CPI-U annual averages (same series and method as nfip-paid-claims-by-state); NfipClaims asOfDate 2026-09-08.",
+  "Declarations: administrative decisions, not measured damage; scope = Flood, Hurricane, Severe Storm, Severe Storm(s), major disaster (DR) and emergency (EM), declared since 2000, counted once per disaster number.",
+  "Owners assistance: FEMA inspections of owner applicants to the Individuals and Households Program (inspected damage bands, not insurance claims or grants); NFIP and IHP figures measure different populations and are never added.",
+  "This product uses the Federal Emergency Management Agency’s OpenFEMA API, but is not endorsed by FEMA. The Federal Government or FEMA cannot vouch for the data or analyses derived from these data after the data have been retrieved from the Agency's website(s).",
+  "County of a policy = first 5 digits of censusGeoid (block group of the address); county of a claim = countyCode. FEMA: \"the County Code field may not reflect the individual county the property is located\".",
+  "Dominant event: Hurricane Matthew = 0.632 of paid claims 2015-2024.",
+  "Owners assistance: HousingAssistanceOwners has no FIPS field; rows joined on the county text (DDS designatedArea, then Census 2020 name). HA: \"the applicant has the right to choose the county\"."
+ ],
+ "premiums": {
+  "window": "policies effective 2025",
+  "occupancy": "residential (occupancyType 1,2,3,11,12,13,14)",
+  "field": "policyCost",
+  "n": 8093,
+  "median": 766,
+  "q1": 545,
+  "q3": 1055,
+  "by_zone_group": [
+   {
+    "group": "SFHA (A, AE, AH, AO, AR, A99, V, VE)",
+    "n": 5064,
+    "median": 904,
+    "q1": 677,
+    "q3": 1173
+   },
+   {
+    "group": "Outside SFHA (X, B, C)",
+    "n": 3029,
+    "median": 571,
+    "q1": 440,
+    "q3": 761
+   }
+  ],
+  "by_zone": [
+   {
+    "zone": "AE",
+    "n": 5008,
+    "median": 902,
+    "q1": 676,
+    "q3": 1172
+   },
+   {
+    "zone": "X",
+    "n": 3029,
+    "median": 571,
+    "q1": 440,
+    "q3": 761
+   }
+  ],
+  "policies_trend": [
+   {
+    "year": 2019,
+    "n": 9697
+   },
+   {
+    "year": 2020,
+    "n": 9439
+   },
+   {
+    "year": 2021,
+    "n": 9251
+   },
+   {
+    "year": 2022,
+    "n": 8539
+   },
+   {
+    "year": 2023,
+    "n": 8161
+   },
+   {
+    "year": 2024,
+    "n": 8178
+   },
+   {
+    "year": 2025,
+    "n": 8093
+   }
+  ]
+ },
+ "claims": {
+  "window": "year of loss 2015-2024",
+  "n_paid": 372,
+  "median_paid": 7149,
+  "q1": 3141,
+  "q3": 14307,
+  "dollars": "nominal",
+  "median_paid_2024usd": 9174,
+  "top_events": [
+   {
+    "name": "Hurricane Matthew",
+    "n": 235,
+    "share": 0.632
+   },
+   {
+    "name": "October severe storms",
+    "n": 34,
+    "share": 0.091
+   },
+   {
+    "name": "Hurricane Eta",
+    "n": 9,
+    "share": 0.024
+   },
+   {
+    "name": "Hurricane Ian",
+    "n": 1,
+    "share": 0.003
+   }
+  ],
+  "dominant_event_share": 0.632,
+  "by_year": [
+   {
+    "year": 2015,
+    "n": 39
+   },
+   {
+    "year": 2016,
+    "n": 288
+   },
+   {
+    "year": 2017,
+    "n": 1
+   },
+   {
+    "year": 2018,
+    "n": 5
+   },
+   {
+    "year": 2019,
+    "n": 7
+   },
+   {
+    "year": 2020,
+    "n": 11
+   },
+   {
+    "year": 2021,
+    "n": 3
+   },
+   {
+    "year": 2022,
+    "n": 11
+   },
+   {
+    "year": 2023,
+    "n": 4
+   },
+   {
+    "year": 2024,
+    "n": 3
+   }
+  ]
+ },
+ "declarations": {
+  "since": 2000,
+  "n_total": 8,
+  "by_incident_type": {
+   "Flood": 0,
+   "Hurricane": 7,
+   "Severe Storm": 1
+  },
+  "major_only": 4,
+  "latest": [
+   {
+    "id": "EM-3403",
+    "title": "HURRICANE FLORENCE",
+    "incident_type": "Hurricane",
+    "date": "2018-09-11"
+   },
+   {
+    "id": "DR-4291",
+    "title": "HURRICANE MATTHEW",
+    "incident_type": "Hurricane",
+    "date": "2016-11-02"
+   },
+   {
+    "id": "EM-3359",
+    "title": "HURRICANE SANDY",
+    "incident_type": "Hurricane",
+    "date": "2012-10-29"
+   },
+   {
+    "id": "DR-4024",
+    "title": "HURRICANE IRENE",
+    "incident_type": "Hurricane",
+    "date": "2011-09-03"
+   },
+   {
+    "id": "EM-3329",
+    "title": "HURRICANE IRENE",
+    "incident_type": "Hurricane",
+    "date": "2011-08-26"
+   }
+  ]
+ },
+ "owners_assistance": {
+  "since": 2002,
+  "n_inspected": 1725,
+  "damage_bands": [
+   {
+    "band": "No FEMA-inspected damage",
+    "n": 170
+   },
+   {
+    "band": "$1-$10,000",
+    "n": 1500
+   },
+   {
+    "band": "$10,001-$20,000",
+    "n": 54
+   },
+   {
+    "band": "$20,001-$30,000",
+    "n": 1
+   },
+   {
+    "band": "More than $30,000",
+    "n": 0
+   }
+  ],
+  "top_disasters": [
+   {
+    "id": "DR-1491",
+    "n": 1445,
+    "title": "HURRICANE ISABEL",
+    "date": "2003-09-18"
+   },
+   {
+    "id": "DR-4291",
+    "n": 280,
+    "title": "HURRICANE MATTHEW",
+    "date": "2016-11-02"
+   }
+  ]
+ },
+ "compare": {
+  "peers": {
+   "family": "counties",
+   "n": 339
+  },
+  "values": {
+   "policies": 8093,
+   "median_premium": 766,
+   "paid_claims": 372,
+   "median_paid": 7149,
+   "declarations": 8,
+   "owners_over_30k_share": 0.0
+  },
+  "rank_in_family": {
+   "policies": {
+    "rank": 70,
+    "of": 339
+   },
+   "median_premium": {
+    "rank": 298,
+    "of": 339
+   },
+   "paid_claims": {
+    "rank": 137,
+    "of": 339
+   },
+   "median_paid": {
+    "rank": 321,
+    "of": 339
+   },
+   "declarations": {
+    "rank": 291,
+    "of": 339
+   },
+   "owners_over_30k_share": {
+    "rank": 326,
+    "of": 339
+   }
+  },
+  "national": {
+   "median_premium": 1055,
+   "median_paid": 37248,
+   "owners_over_30k_share": 0.026
+  },
+  "gaps": {
+   "median_premium": {
+    "national": {
+     "ref": 1055,
+     "diff": -289,
+     "rel": -0.274
+    },
+    "state": {
+     "ref": 804,
+     "diff": -38,
+     "rel": -0.047
+    }
+   },
+   "median_paid": {
+    "national": {
+     "ref": 37248,
+     "diff": -30099,
+     "rel": -0.808
+    },
+    "state": {
+     "ref": 13201,
+     "diff": -6052,
+     "rel": -0.458
+    }
+   },
+   "owners_over_30k_share": {
+    "national": {
+     "ref": 0.026,
+     "diff": -0.026,
+     "rel": -1.0
+    },
+    "state": {
+     "ref": 0.007,
+     "diff": -0.007,
+     "rel": -1.0
+    }
+   },
+   "declarations": {
+    "state_counties": {
+     "ref": 8,
+     "diff": 0,
+     "rel": 0.0
+    }
+   }
+  },
+  "rank_in_state": {
+   "policies": {
+    "rank": 3,
+    "of": 6
+   },
+   "median_premium": {
+    "rank": 1,
+    "of": 6
+   },
+   "paid_claims": {
+    "rank": 2,
+    "of": 6
+   },
+   "median_paid": {
+    "rank": 4,
+    "of": 6
+   },
+   "declarations": {
+    "rank": 2,
+    "of": 6
+   },
+   "owners_over_30k_share": {
+    "rank": 6,
+    "of": 6
+   }
+  },
+  "state": {
+   "median_premium": 804,
+   "median_paid": 13201,
+   "owners_over_30k_share": 0.007,
+   "counties": 6,
+   "declarations_county_median": 8
+  }
+ },
+ "community_status": {
+  "n": 1,
+  "participating": 1,
+  "crs_classed": 1,
+  "share_classed": 1.0,
+  "best_class": 5,
+  "best_class_communities": [
+   "NORFOLK, CITY OF"
+  ],
+  "oldest_current_map": {
+   "date": "2017-02-17",
+   "community": "NORFOLK, CITY OF"
+  },
+  "sanctioned": 0,
+  "suspended": 0,
+  "withdrawn": 0,
+  "not_participating": 0,
+  "communities": [
+   {
+    "id": "510104",
+    "name": "NORFOLK, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 5,
+    "sfha_discount_pct": 25,
+    "non_sfha_discount_pct": 10,
+    "current_map": "2017-02-17",
+    "current_map_code": null,
+    "first_firm": "1979-08-01",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   }
+  ],
+  "multi_county_communities": [],
+  "state_join_share": 0.022
+ }
+}

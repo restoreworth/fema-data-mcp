@@ -1,0 +1,396 @@
+{
+ "id": "UT",
+ "kind": "state",
+ "name": "Utah",
+ "state": "UT",
+ "slug": "utah",
+ "generated_at": "2026-10-12T13:15:44Z",
+ "sources": [
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-11",
+   "filter": "policyEffectiveDate ge '2025-01-01' and lt '2026-01-01', per propertyState (rows downloaded, every occupancy; residential and policyCost > 0 kept locally)"
+  },
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "$inlinecount per year 2019-2025: propertyState eq '<ST>' and occupancyType in (1,2,3,11,12,13,14) [and startswith(censusGeoid,'<county FIPS>')]"
+  },
+  {
+   "dataset": "NfipClaims",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipClaims",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "yearOfLoss eq <year> and amountPaidOnBuildingClaim gt 0 (one request per year)"
+  },
+  {
+   "dataset": "CPI-U, U.S. city average, all items (CUUR0000SA0), annual average",
+   "version": "BLS Public Data API v1",
+   "api": "https://api.bls.gov/publicAPI/v1/timeseries/data/",
+   "as_of": "annual averages 2005-2025",
+   "accessed_at": "2026-10-12",
+   "filter": "period M13"
+  },
+  {
+   "dataset": "DisasterDeclarationsSummaries",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/DisasterDeclarationsSummaries",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows); declarationType DR or EM, incidentType Flood, Hurricane, Severe Storm, Severe Storm(s), declarationDate >= 2000 kept locally"
+  },
+  {
+   "dataset": "HousingAssistanceOwners",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/HousingAssistanceOwners",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows)"
+  },
+  {
+   "dataset": "NfipCommunityStatusBook",
+   "version": "v1",
+   "api": "https://www.fema.gov/api/open/v1/NfipCommunityStatusBook",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "all rows; community -> county on the `county` text field"
+  }
+ ],
+ "notes": [
+  "FEMA field definition (NfipPolicies v3, policyCost): \"Calculated in dollars by adding together calculated premium, reserve fund assessment, federal policy fee, and HFIAA surcharge\"",
+  "FEMA field definition (NfipPolicies v3, totalInsurancePremiumOfThePolicy): \"Total Insurance Premium of the Policy in whole dollars. Negative values indicate a refund.\"; policyCost is used because it is what the policyholder pays; policyCost < totalInsurancePremiumOfThePolicy on 0 of 3117116 kept residential policies.",
+  "Premiums: one row = one policy term effective in 2025 (NFIP only, no private insurance); median and quartiles are Hyndman-Fan type 7, rounded half up to the dollar; a cell (State, zone, zone group, county) is published only when n >= 100.",
+  "Flood zones: ratedFloodZone grouped as A1-A30 -> AE, V1-V30 -> VE, B/C/X -> X, AOB -> AO, AHB -> AH, AR* -> AR; zone D and unknown zones are left out of the zone tables.",
+  "policies_trend: residential policy terms per year counted by the API ($inlinecount), all premiums included (policyCost <= 0 too), so the 2025 count can differ from premiums.n (county: the API count also filters propertyState, premiums.n does not).",
+  "Claims: amounts paid by NFIP on building claims (amountPaidOnBuildingClaim > 0), not repair costs; nominal dollars; median_paid_2024usd deflates each claim by its yearOfLoss with CPI-U annual averages (same series and method as nfip-paid-claims-by-state); NfipClaims asOfDate 2026-09-08.",
+  "Declarations: administrative decisions, not measured damage; scope = Flood, Hurricane, Severe Storm, Severe Storm(s), major disaster (DR) and emergency (EM), declared since 2000, counted once per disaster number.",
+  "Owners assistance: FEMA inspections of owner applicants to the Individuals and Households Program (inspected damage bands, not insurance claims or grants); NFIP and IHP figures measure different populations and are never added.",
+  "This product uses the Federal Emergency Management Agency’s OpenFEMA API, but is not endorsed by FEMA. The Federal Government or FEMA cannot vouch for the data or analyses derived from these data after the data have been retrieved from the Agency's website(s).",
+  "0 residential 2025 policies with policyCost <= 0 or empty are left out; 9 kept policies have zone D or an unknown zone (in n, not in the zone tables).",
+  "Claims: fewer than 100 paid claims in 2015-2024, statistics not published."
+ ],
+ "premiums": {
+  "window": "policies effective 2025",
+  "occupancy": "residential (occupancyType 1,2,3,11,12,13,14)",
+  "field": "policyCost",
+  "n": 3106,
+  "median": 676,
+  "q1": 468,
+  "q3": 1016,
+  "by_zone_group": [
+   {
+    "group": "SFHA (A, AE, AH, AO, AR, A99, V, VE)",
+    "n": 1230,
+    "median": 773,
+    "q1": 563,
+    "q3": 1120
+   },
+   {
+    "group": "Outside SFHA (X, B, C)",
+    "n": 1867,
+    "median": 605,
+    "q1": 427,
+    "q3": 938
+   }
+  ],
+  "by_zone": [
+   {
+    "zone": "X",
+    "n": 1867,
+    "median": 605,
+    "q1": 427,
+    "q3": 938
+   },
+   {
+    "zone": "AE",
+    "n": 621,
+    "median": 800,
+    "q1": 576,
+    "q3": 1080
+   },
+   {
+    "zone": "A",
+    "n": 462,
+    "median": 731,
+    "q1": 541,
+    "q3": 1253
+   }
+  ],
+  "policies_trend": [
+   {
+    "year": 2019,
+    "n": 3199
+   },
+   {
+    "year": 2020,
+    "n": 3104
+   },
+   {
+    "year": 2021,
+    "n": 3139
+   },
+   {
+    "year": 2022,
+    "n": 2999
+   },
+   {
+    "year": 2023,
+    "n": 6232
+   },
+   {
+    "year": 2024,
+    "n": 3432
+   },
+   {
+    "year": 2025,
+    "n": 3106
+   }
+  ]
+ },
+ "claims": {
+  "window": "year of loss 2015-2024",
+  "n_paid": 99,
+  "median_paid": null,
+  "q1": null,
+  "q3": null,
+  "dollars": "nominal",
+  "median_paid_2024usd": null,
+  "top_events": [
+   {
+    "name": "Tropical Storm Hilary",
+    "n": 1,
+    "share": 0.01
+   }
+  ],
+  "dominant_event_share": 0.01,
+  "by_year": [
+   {
+    "year": 2015,
+    "n": 10
+   },
+   {
+    "year": 2016,
+    "n": 3
+   },
+   {
+    "year": 2017,
+    "n": 11
+   },
+   {
+    "year": 2018,
+    "n": 5
+   },
+   {
+    "year": 2019,
+    "n": 6
+   },
+   {
+    "year": 2020,
+    "n": 2
+   },
+   {
+    "year": 2021,
+    "n": 12
+   },
+   {
+    "year": 2022,
+    "n": 6
+   },
+   {
+    "year": 2023,
+    "n": 37
+   },
+   {
+    "year": 2024,
+    "n": 7
+   }
+  ]
+ },
+ "declarations": {
+  "since": 2000,
+  "n_total": 10,
+  "by_incident_type": {
+   "Flood": 7,
+   "Hurricane": 0,
+   "Severe Storm": 3
+  },
+  "major_only": 10,
+  "latest": [
+   {
+    "id": "DR-4948",
+    "title": "COTTONWOOD FIRE, FLOODING, AND MUDSLIDES",
+    "incident_type": "Flood",
+    "date": "2026-10-07"
+   },
+   {
+    "id": "DR-4752",
+    "title": "FLOODING",
+    "incident_type": "Flood",
+    "date": "2023-12-23"
+   },
+   {
+    "id": "DR-4578",
+    "title": "STRAIGHT-LINE WINDS",
+    "incident_type": "Severe Storm",
+    "date": "2021-01-12"
+   },
+   {
+    "id": "DR-4311",
+    "title": "SEVERE WINTER STORMS AND FLOODING",
+    "incident_type": "Flood",
+    "date": "2017-04-21"
+   },
+   {
+    "id": "DR-4088",
+    "title": "SEVERE STORM AND FLOODING",
+    "incident_type": "Flood",
+    "date": "2012-11-03"
+   }
+  ]
+ },
+ "owners_assistance": {
+  "since": 2002,
+  "n_inspected": 550,
+  "damage_bands": [
+   {
+    "band": "No FEMA-inspected damage",
+    "n": 253
+   },
+   {
+    "band": "$1-$10,000",
+    "n": 290
+   },
+   {
+    "band": "$10,001-$20,000",
+    "n": 6
+   },
+   {
+    "band": "$20,001-$30,000",
+    "n": 1
+   },
+   {
+    "band": "More than $30,000",
+    "n": 0
+   }
+  ],
+  "top_disasters": [
+   {
+    "id": "DR-4548",
+    "n": 550,
+    "title": "EARTHQUAKE AND AFTERSHOCKS",
+    "date": "2020-07-09"
+   }
+  ]
+ },
+ "compare": {
+  "peers": {
+   "family": "states",
+   "n": 53
+  },
+  "values": {
+   "policies": 3106,
+   "median_premium": 676,
+   "paid_claims": 99,
+   "median_paid": null,
+   "declarations": 10,
+   "owners_over_30k_share": 0.0
+  },
+  "rank_in_family": {
+   "policies": {
+    "rank": 47,
+    "of": 53
+   },
+   "median_premium": {
+    "rank": 48,
+    "of": 53
+   },
+   "paid_claims": {
+    "rank": 52,
+    "of": 53
+   },
+   "median_paid": null,
+   "declarations": {
+    "rank": 50,
+    "of": 53
+   },
+   "owners_over_30k_share": {
+    "rank": 51,
+    "of": 52
+   }
+  },
+  "national": {
+   "median_premium": 1055,
+   "median_paid": 37248,
+   "owners_over_30k_share": 0.026
+  },
+  "gaps": {
+   "median_premium": {
+    "national": {
+     "ref": 1055,
+     "diff": -379,
+     "rel": -0.359
+    }
+   },
+   "median_paid": {
+    "national": null
+   },
+   "owners_over_30k_share": {
+    "national": {
+     "ref": 0.026,
+     "diff": -0.026,
+     "rel": -1.0
+    }
+   }
+  }
+ },
+ "community_status": {
+  "n": 254,
+  "participating": 229,
+  "crs_classed": 13,
+  "share_classed": 0.051,
+  "best_class": 6,
+  "best_class_communities": [
+   "ST. GEORGE, CITY OF"
+  ],
+  "oldest_current_map": {
+   "date": "1974-12-20",
+   "community": "LOA, TOWN OF"
+  },
+  "sanctioned": 25,
+  "suspended": 2,
+  "withdrawn": 0,
+  "not_participating": 25,
+  "crs_classes": [
+   {
+    "class": 6,
+    "n": 1
+   },
+   {
+    "class": 7,
+    "n": 2
+   },
+   {
+    "class": 8,
+    "n": 2
+   },
+   {
+    "class": 9,
+    "n": 2
+   },
+   {
+    "class": 10,
+    "n": 6
+   }
+  ],
+  "orphans": 0,
+  "multi_county": 3,
+  "join_share": 0.012
+ }
+}

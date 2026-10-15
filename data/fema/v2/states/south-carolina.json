@@ -1,0 +1,469 @@
+{
+ "id": "SC",
+ "kind": "state",
+ "name": "South Carolina",
+ "state": "SC",
+ "slug": "south-carolina",
+ "generated_at": "2026-10-12T13:15:44Z",
+ "sources": [
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-11",
+   "filter": "policyEffectiveDate ge '2025-01-01' and lt '2026-01-01', per propertyState (rows downloaded, every occupancy; residential and policyCost > 0 kept locally)"
+  },
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "$inlinecount per year 2019-2025: propertyState eq '<ST>' and occupancyType in (1,2,3,11,12,13,14) [and startswith(censusGeoid,'<county FIPS>')]"
+  },
+  {
+   "dataset": "NfipClaims",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipClaims",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "yearOfLoss eq <year> and amountPaidOnBuildingClaim gt 0 (one request per year)"
+  },
+  {
+   "dataset": "CPI-U, U.S. city average, all items (CUUR0000SA0), annual average",
+   "version": "BLS Public Data API v1",
+   "api": "https://api.bls.gov/publicAPI/v1/timeseries/data/",
+   "as_of": "annual averages 2005-2025",
+   "accessed_at": "2026-10-12",
+   "filter": "period M13"
+  },
+  {
+   "dataset": "DisasterDeclarationsSummaries",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/DisasterDeclarationsSummaries",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows); declarationType DR or EM, incidentType Flood, Hurricane, Severe Storm, Severe Storm(s), declarationDate >= 2000 kept locally"
+  },
+  {
+   "dataset": "HousingAssistanceOwners",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/HousingAssistanceOwners",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows)"
+  },
+  {
+   "dataset": "NfipCommunityStatusBook",
+   "version": "v1",
+   "api": "https://www.fema.gov/api/open/v1/NfipCommunityStatusBook",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "all rows; community -> county on the `county` text field"
+  }
+ ],
+ "notes": [
+  "FEMA field definition (NfipPolicies v3, policyCost): \"Calculated in dollars by adding together calculated premium, reserve fund assessment, federal policy fee, and HFIAA surcharge\"",
+  "FEMA field definition (NfipPolicies v3, totalInsurancePremiumOfThePolicy): \"Total Insurance Premium of the Policy in whole dollars. Negative values indicate a refund.\"; policyCost is used because it is what the policyholder pays; policyCost < totalInsurancePremiumOfThePolicy on 0 of 3117116 kept residential policies.",
+  "Premiums: one row = one policy term effective in 2025 (NFIP only, no private insurance); median and quartiles are Hyndman-Fan type 7, rounded half up to the dollar; a cell (State, zone, zone group, county) is published only when n >= 100.",
+  "Flood zones: ratedFloodZone grouped as A1-A30 -> AE, V1-V30 -> VE, B/C/X -> X, AOB -> AO, AHB -> AH, AR* -> AR; zone D and unknown zones are left out of the zone tables.",
+  "policies_trend: residential policy terms per year counted by the API ($inlinecount), all premiums included (policyCost <= 0 too), so the 2025 count can differ from premiums.n (county: the API count also filters propertyState, premiums.n does not).",
+  "Claims: amounts paid by NFIP on building claims (amountPaidOnBuildingClaim > 0), not repair costs; nominal dollars; median_paid_2024usd deflates each claim by its yearOfLoss with CPI-U annual averages (same series and method as nfip-paid-claims-by-state); NfipClaims asOfDate 2026-09-08.",
+  "Declarations: administrative decisions, not measured damage; scope = Flood, Hurricane, Severe Storm, Severe Storm(s), major disaster (DR) and emergency (EM), declared since 2000, counted once per disaster number.",
+  "Owners assistance: FEMA inspections of owner applicants to the Individuals and Households Program (inspected damage bands, not insurance claims or grants); NFIP and IHP figures measure different populations and are never added.",
+  "This product uses the Federal Emergency Management Agency’s OpenFEMA API, but is not endorsed by FEMA. The Federal Government or FEMA cannot vouch for the data or analyses derived from these data after the data have been retrieved from the Agency's website(s).",
+  "0 residential 2025 policies with policyCost <= 0 or empty are left out; 0 kept policies have zone D or an unknown zone (in n, not in the zone tables).",
+  "Owners assistance: county names not matched to a FIPS code (counted in the State total only): Catawba Indian Nation (no match, 284 inspected)"
+ ],
+ "premiums": {
+  "window": "policies effective 2025",
+  "occupancy": "residential (occupancyType 1,2,3,11,12,13,14)",
+  "field": "policyCost",
+  "n": 119542,
+  "median": 917,
+  "q1": 658,
+  "q3": 1165,
+  "by_zone_group": [
+   {
+    "group": "SFHA (A, AE, AH, AO, AR, A99, V, VE)",
+    "n": 64594,
+    "median": 1037,
+    "q1": 840,
+    "q3": 1451
+   },
+   {
+    "group": "Outside SFHA (X, B, C)",
+    "n": 54948,
+    "median": 702,
+    "q1": 542,
+    "q3": 985
+   }
+  ],
+  "by_zone": [
+   {
+    "zone": "AE",
+    "n": 62212,
+    "median": 1034,
+    "q1": 840,
+    "q3": 1421
+   },
+   {
+    "zone": "X",
+    "n": 54948,
+    "median": 702,
+    "q1": 542,
+    "q3": 985
+   },
+   {
+    "zone": "VE",
+    "n": 1596,
+    "median": 2226,
+    "q1": 1147,
+    "q3": 4737
+   },
+   {
+    "zone": "A",
+    "n": 641,
+    "median": 802,
+    "q1": 649,
+    "q3": 1076
+   },
+   {
+    "zone": "AO",
+    "n": 126,
+    "median": 1284,
+    "q1": 1056,
+    "q3": 2864
+   }
+  ],
+  "policies_trend": [
+   {
+    "year": 2019,
+    "n": 159619
+   },
+   {
+    "year": 2020,
+    "n": 167673
+   },
+   {
+    "year": 2021,
+    "n": 155219
+   },
+   {
+    "year": 2022,
+    "n": 136215
+   },
+   {
+    "year": 2023,
+    "n": 128679
+   },
+   {
+    "year": 2024,
+    "n": 124531
+   },
+   {
+    "year": 2025,
+    "n": 119542
+   }
+  ]
+ },
+ "claims": {
+  "window": "year of loss 2015-2024",
+  "n_paid": 15891,
+  "median_paid": 14847,
+  "q1": 5239,
+  "q3": 37799,
+  "dollars": "nominal",
+  "median_paid_2024usd": 18692,
+  "top_events": [
+   {
+    "name": "Hurricane Matthew",
+    "n": 4970,
+    "share": 0.313
+   },
+   {
+    "name": "October severe storms",
+    "n": 3946,
+    "share": 0.248
+   },
+   {
+    "name": "Hurricane Irma",
+    "n": 1994,
+    "share": 0.125
+   },
+   {
+    "name": "Hurricane Florence",
+    "n": 1248,
+    "share": 0.079
+   },
+   {
+    "name": "Hurricane Ian",
+    "n": 937,
+    "share": 0.059
+   }
+  ],
+  "dominant_event_share": 0.313,
+  "by_year": [
+   {
+    "year": 2015,
+    "n": 4196
+   },
+   {
+    "year": 2016,
+    "n": 5101
+   },
+   {
+    "year": 2017,
+    "n": 2097
+   },
+   {
+    "year": 2018,
+    "n": 1431
+   },
+   {
+    "year": 2019,
+    "n": 132
+   },
+   {
+    "year": 2020,
+    "n": 620
+   },
+   {
+    "year": 2021,
+    "n": 191
+   },
+   {
+    "year": 2022,
+    "n": 1029
+   },
+   {
+    "year": 2023,
+    "n": 403
+   },
+   {
+    "year": 2024,
+    "n": 691
+   }
+  ]
+ },
+ "declarations": {
+  "since": 2000,
+  "n_total": 22,
+  "by_incident_type": {
+   "Flood": 2,
+   "Hurricane": 15,
+   "Severe Storm": 5
+  },
+  "major_only": 14,
+  "latest": [
+   {
+    "id": "DR-4858",
+    "title": "SEVERE STORMS AND FLOODING",
+    "incident_type": "Flood",
+    "date": "2025-01-10"
+   },
+   {
+    "id": "DR-4829",
+    "title": "HURRICANE HELENE",
+    "incident_type": "Hurricane",
+    "date": "2024-09-29"
+   },
+   {
+    "id": "EM-3597",
+    "title": "HURRICANE IDALIA",
+    "incident_type": "Hurricane",
+    "date": "2023-08-31"
+   },
+   {
+    "id": "DR-4677",
+    "title": "HURRICANE IAN",
+    "incident_type": "Hurricane",
+    "date": "2022-11-21"
+   },
+   {
+    "id": "EM-3585",
+    "title": "HURRICANE IAN",
+    "incident_type": "Hurricane",
+    "date": "2022-09-29"
+   }
+  ]
+ },
+ "owners_assistance": {
+  "since": 2002,
+  "n_inspected": 152671,
+  "damage_bands": [
+   {
+    "band": "No FEMA-inspected damage",
+    "n": 38702
+   },
+   {
+    "band": "$1-$10,000",
+    "n": 106916
+   },
+   {
+    "band": "$10,001-$20,000",
+    "n": 4875
+   },
+   {
+    "band": "$20,001-$30,000",
+    "n": 1398
+   },
+   {
+    "band": "More than $30,000",
+    "n": 780
+   }
+  ],
+  "top_disasters": [
+   {
+    "id": "DR-4241",
+    "n": 63323,
+    "title": "SEVERE STORMS AND FLOODING",
+    "date": "2015-10-05"
+   },
+   {
+    "id": "DR-4829",
+    "n": 44609,
+    "title": "HURRICANE HELENE",
+    "date": "2024-09-29"
+   },
+   {
+    "id": "DR-4286",
+    "n": 25057,
+    "title": "HURRICANE MATTHEW",
+    "date": "2016-10-11"
+   },
+   {
+    "id": "DR-4394",
+    "n": 9699,
+    "title": "HURRICANE FLORENCE",
+    "date": "2018-09-16"
+   },
+   {
+    "id": "DR-1566",
+    "n": 6769,
+    "title": "TROPICAL STORM FRANCES",
+    "date": "2004-10-07"
+   }
+  ]
+ },
+ "compare": {
+  "peers": {
+   "family": "states",
+   "n": 53
+  },
+  "values": {
+   "policies": 119542,
+   "median_premium": 917,
+   "paid_claims": 15891,
+   "median_paid": 14847,
+   "declarations": 22,
+   "owners_over_30k_share": 0.005
+  },
+  "rank_in_family": {
+   "policies": {
+    "rank": 5,
+    "of": 53
+   },
+   "median_premium": {
+    "rank": 43,
+    "of": 53
+   },
+   "paid_claims": {
+    "rank": 5,
+    "of": 53
+   },
+   "median_paid": {
+    "rank": 24,
+    "of": 51
+   },
+   "declarations": {
+    "rank": 33,
+    "of": 53
+   },
+   "owners_over_30k_share": {
+    "rank": 44,
+    "of": 52
+   }
+  },
+  "national": {
+   "median_premium": 1055,
+   "median_paid": 37248,
+   "owners_over_30k_share": 0.026
+  },
+  "gaps": {
+   "median_premium": {
+    "national": {
+     "ref": 1055,
+     "diff": -138,
+     "rel": -0.131
+    }
+   },
+   "median_paid": {
+    "national": {
+     "ref": 37248,
+     "diff": -22401,
+     "rel": -0.601
+    }
+   },
+   "owners_over_30k_share": {
+    "national": {
+     "ref": 0.026,
+     "diff": -0.021,
+     "rel": -0.808
+    }
+   }
+  }
+ },
+ "community_status": {
+  "n": 269,
+  "participating": 240,
+  "crs_classed": 49,
+  "share_classed": 0.182,
+  "best_class": 2,
+  "best_class_communities": [
+   "CHARLESTON COUNTY*"
+  ],
+  "oldest_current_map": {
+   "date": "2006-12-19",
+   "community": "BETHUNE, TOWN OF"
+  },
+  "sanctioned": 29,
+  "suspended": 3,
+  "withdrawn": 0,
+  "not_participating": 29,
+  "crs_classes": [
+   {
+    "class": 2,
+    "n": 1
+   },
+   {
+    "class": 3,
+    "n": 1
+   },
+   {
+    "class": 5,
+    "n": 14
+   },
+   {
+    "class": 6,
+    "n": 10
+   },
+   {
+    "class": 7,
+    "n": 10
+   },
+   {
+    "class": 8,
+    "n": 5
+   },
+   {
+    "class": 9,
+    "n": 8
+   }
+  ],
+  "orphans": 0,
+  "multi_county": 17,
+  "join_share": 0.063
+ }
+}

@@ -1,0 +1,542 @@
+{
+ "id": "48021",
+ "kind": "county",
+ "name": "Bastrop County",
+ "state": "TX",
+ "slug": "bastrop-county-tx",
+ "generated_at": "2026-10-12T13:15:44Z",
+ "sources": [
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-11",
+   "filter": "policyEffectiveDate ge '2025-01-01' and lt '2026-01-01', per propertyState (rows downloaded, every occupancy; residential and policyCost > 0 kept locally)"
+  },
+  {
+   "dataset": "NfipPolicies",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipPolicies",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "$inlinecount per year 2019-2025: propertyState eq '<ST>' and occupancyType in (1,2,3,11,12,13,14) [and startswith(censusGeoid,'<county FIPS>')]"
+  },
+  {
+   "dataset": "NfipClaims",
+   "version": "v3",
+   "api": "https://www.fema.gov/api/open/v3/NfipClaims",
+   "as_of": "2026-09-09",
+   "accessed_at": "2026-10-12",
+   "filter": "yearOfLoss eq <year> and amountPaidOnBuildingClaim gt 0 (one request per year)"
+  },
+  {
+   "dataset": "CPI-U, U.S. city average, all items (CUUR0000SA0), annual average",
+   "version": "BLS Public Data API v1",
+   "api": "https://api.bls.gov/publicAPI/v1/timeseries/data/",
+   "as_of": "annual averages 2005-2025",
+   "accessed_at": "2026-10-12",
+   "filter": "period M13"
+  },
+  {
+   "dataset": "DisasterDeclarationsSummaries",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/DisasterDeclarationsSummaries",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows); declarationType DR or EM, incidentType Flood, Hurricane, Severe Storm, Severe Storm(s), declarationDate >= 2000 kept locally"
+  },
+  {
+   "dataset": "HousingAssistanceOwners",
+   "version": "v2",
+   "api": "https://www.fema.gov/api/open/v2/HousingAssistanceOwners",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "none (all rows)"
+  },
+  {
+   "dataset": "NfipCommunityStatusBook",
+   "version": "v1",
+   "api": "https://www.fema.gov/api/open/v1/NfipCommunityStatusBook",
+   "as_of": "2026-10-11",
+   "accessed_at": "2026-10-12",
+   "filter": "all rows; community -> county on the `county` text field"
+  }
+ ],
+ "notes": [
+  "FEMA field definition (NfipPolicies v3, policyCost): \"Calculated in dollars by adding together calculated premium, reserve fund assessment, federal policy fee, and HFIAA surcharge\"",
+  "FEMA field definition (NfipPolicies v3, totalInsurancePremiumOfThePolicy): \"Total Insurance Premium of the Policy in whole dollars. Negative values indicate a refund.\"; policyCost is used because it is what the policyholder pays; policyCost < totalInsurancePremiumOfThePolicy on 0 of 3117116 kept residential policies.",
+  "Premiums: one row = one policy term effective in 2025 (NFIP only, no private insurance); median and quartiles are Hyndman-Fan type 7, rounded half up to the dollar; a cell (State, zone, zone group, county) is published only when n >= 100.",
+  "Flood zones: ratedFloodZone grouped as A1-A30 -> AE, V1-V30 -> VE, B/C/X -> X, AOB -> AO, AHB -> AH, AR* -> AR; zone D and unknown zones are left out of the zone tables.",
+  "policies_trend: residential policy terms per year counted by the API ($inlinecount), all premiums included (policyCost <= 0 too), so the 2025 count can differ from premiums.n (county: the API count also filters propertyState, premiums.n does not).",
+  "Claims: amounts paid by NFIP on building claims (amountPaidOnBuildingClaim > 0), not repair costs; nominal dollars; median_paid_2024usd deflates each claim by its yearOfLoss with CPI-U annual averages (same series and method as nfip-paid-claims-by-state); NfipClaims asOfDate 2026-09-08.",
+  "Declarations: administrative decisions, not measured damage; scope = Flood, Hurricane, Severe Storm, Severe Storm(s), major disaster (DR) and emergency (EM), declared since 2000, counted once per disaster number.",
+  "Owners assistance: FEMA inspections of owner applicants to the Individuals and Households Program (inspected damage bands, not insurance claims or grants); NFIP and IHP figures measure different populations and are never added.",
+  "This product uses the Federal Emergency Management Agency’s OpenFEMA API, but is not endorsed by FEMA. The Federal Government or FEMA cannot vouch for the data or analyses derived from these data after the data have been retrieved from the Agency's website(s).",
+  "County of a policy = first 5 digits of censusGeoid (block group of the address); county of a claim = countyCode. FEMA: \"the County Code field may not reflect the individual county the property is located\".",
+  "Dominant event: Early summer severe storms = 0.33 of paid claims 2015-2024.",
+  "Owners assistance: HousingAssistanceOwners has no FIPS field; rows joined on the county text (DDS designatedArea, then Census 2020 name). HA: \"the applicant has the right to choose the county\"."
+ ],
+ "premiums": {
+  "window": "policies effective 2025",
+  "occupancy": "residential (occupancyType 1,2,3,11,12,13,14)",
+  "field": "policyCost",
+  "n": 485,
+  "median": 1062,
+  "q1": 815,
+  "q3": 1325,
+  "by_zone_group": [
+   {
+    "group": "SFHA (A, AE, AH, AO, AR, A99, V, VE)",
+    "n": 263,
+    "median": 1123,
+    "q1": 894,
+    "q3": 1769
+   },
+   {
+    "group": "Outside SFHA (X, B, C)",
+    "n": 222,
+    "median": 1056,
+    "q1": 673,
+    "q3": 1086
+   }
+  ],
+  "by_zone": [
+   {
+    "zone": "X",
+    "n": 222,
+    "median": 1056,
+    "q1": 673,
+    "q3": 1086
+   },
+   {
+    "zone": "A",
+    "n": 142,
+    "median": 1036,
+    "q1": 813,
+    "q3": 1503
+   },
+   {
+    "zone": "AE",
+    "n": 116,
+    "median": 1235,
+    "q1": 970,
+    "q3": 2328
+   }
+  ],
+  "policies_trend": [
+   {
+    "year": 2019,
+    "n": 634
+   },
+   {
+    "year": 2020,
+    "n": 610
+   },
+   {
+    "year": 2021,
+    "n": 633
+   },
+   {
+    "year": 2022,
+    "n": 581
+   },
+   {
+    "year": 2023,
+    "n": 570
+   },
+   {
+    "year": 2024,
+    "n": 532
+   },
+   {
+    "year": 2025,
+    "n": 485
+   }
+  ]
+ },
+ "claims": {
+  "window": "year of loss 2015-2024",
+  "n_paid": 194,
+  "median_paid": 26883,
+  "q1": 9833,
+  "q3": 48759,
+  "dollars": "nominal",
+  "median_paid_2024usd": 35357,
+  "top_events": [
+   {
+    "name": "Early summer severe storms",
+    "n": 64,
+    "share": 0.33
+   },
+   {
+    "name": "Fall severe storms",
+    "n": 38,
+    "share": 0.196
+   },
+   {
+    "name": "Early summer storms",
+    "n": 33,
+    "share": 0.17
+   },
+   {
+    "name": "Hurricane Harvey",
+    "n": 31,
+    "share": 0.16
+   },
+   {
+    "name": "Spring severe storms",
+    "n": 15,
+    "share": 0.077
+   }
+  ],
+  "dominant_event_share": 0.33,
+  "by_year": [
+   {
+    "year": 2015,
+    "n": 77
+   },
+   {
+    "year": 2016,
+    "n": 83
+   },
+   {
+    "year": 2017,
+    "n": 31
+   },
+   {
+    "year": 2018,
+    "n": 1
+   },
+   {
+    "year": 2019,
+    "n": 0
+   },
+   {
+    "year": 2020,
+    "n": 0
+   },
+   {
+    "year": 2021,
+    "n": 2
+   },
+   {
+    "year": 2022,
+    "n": 0
+   },
+   {
+    "year": 2023,
+    "n": 0
+   },
+   {
+    "year": 2024,
+    "n": 0
+   }
+  ]
+ },
+ "declarations": {
+  "since": 2000,
+  "n_total": 8,
+  "by_incident_type": {
+   "Flood": 2,
+   "Hurricane": 4,
+   "Severe Storm": 2
+  },
+  "major_only": 6,
+  "latest": [
+   {
+    "id": "DR-4332",
+    "title": "HURRICANE HARVEY",
+    "incident_type": "Hurricane",
+    "date": "2017-08-25"
+   },
+   {
+    "id": "DR-4272",
+    "title": "SEVERE STORMS AND FLOODING",
+    "incident_type": "Flood",
+    "date": "2016-06-11"
+   },
+   {
+    "id": "DR-4269",
+    "title": "SEVERE STORMS AND FLOODING",
+    "incident_type": "Flood",
+    "date": "2016-04-25"
+   },
+   {
+    "id": "DR-4245",
+    "title": "SEVERE STORMS, TORNADOES, STRAIGHT-LINE WINDS, AND FLOODING",
+    "incident_type": "Severe Storm",
+    "date": "2015-11-25"
+   },
+   {
+    "id": "DR-4223",
+    "title": "SEVERE STORMS, TORNADOES, STRAIGHT-LINE WINDS AND FLOODING",
+    "incident_type": "Severe Storm",
+    "date": "2015-05-29"
+   }
+  ]
+ },
+ "owners_assistance": {
+  "since": 2002,
+  "n_inspected": 2172,
+  "damage_bands": [
+   {
+    "band": "No FEMA-inspected damage",
+    "n": 450
+   },
+   {
+    "band": "$1-$10,000",
+    "n": 1038
+   },
+   {
+    "band": "$10,001-$20,000",
+    "n": 132
+   },
+   {
+    "band": "$20,001-$30,000",
+    "n": 63
+   },
+   {
+    "band": "More than $30,000",
+    "n": 489
+   }
+  ],
+  "top_disasters": [
+   {
+    "id": "DR-4029",
+    "n": 742,
+    "title": "WILDFIRES",
+    "date": "2011-09-09"
+   },
+   {
+    "id": "DR-4332",
+    "n": 463,
+    "title": "HURRICANE HARVEY",
+    "date": "2017-08-25"
+   },
+   {
+    "id": "DR-4223",
+    "n": 366,
+    "title": "SEVERE STORMS, TORNADOES, STRAIGHT-LINE WINDS AND FLOODING",
+    "date": "2015-05-29"
+   },
+   {
+    "id": "DR-4272",
+    "n": 256,
+    "title": "SEVERE STORMS AND FLOODING",
+    "date": "2016-06-11"
+   },
+   {
+    "id": "DR-4586",
+    "n": 237,
+    "title": "SEVERE WINTER STORMS",
+    "date": "2021-02-19"
+   }
+  ]
+ },
+ "compare": {
+  "peers": {
+   "family": "counties",
+   "n": 339
+  },
+  "values": {
+   "policies": 485,
+   "median_premium": 1062,
+   "paid_claims": 194,
+   "median_paid": 26883,
+   "declarations": 8,
+   "owners_over_30k_share": 0.225
+  },
+  "rank_in_family": {
+   "policies": {
+    "rank": 290,
+    "of": 339
+   },
+   "median_premium": {
+    "rank": 172,
+    "of": 339
+   },
+   "paid_claims": {
+    "rank": 231,
+    "of": 339
+   },
+   "median_paid": {
+    "rank": 107,
+    "of": 339
+   },
+   "declarations": {
+    "rank": 291,
+    "of": 339
+   },
+   "owners_over_30k_share": {
+    "rank": 9,
+    "of": 339
+   }
+  },
+  "national": {
+   "median_premium": 1055,
+   "median_paid": 37248,
+   "owners_over_30k_share": 0.026
+  },
+  "gaps": {
+   "median_premium": {
+    "national": {
+     "ref": 1055,
+     "diff": 7,
+     "rel": 0.007
+    },
+    "state": {
+     "ref": 1056,
+     "diff": 6,
+     "rel": 0.006
+    }
+   },
+   "median_paid": {
+    "national": {
+     "ref": 37248,
+     "diff": -10365,
+     "rel": -0.278
+    },
+    "state": {
+     "ref": 55338,
+     "diff": -28455,
+     "rel": -0.514
+    }
+   },
+   "owners_over_30k_share": {
+    "national": {
+     "ref": 0.026,
+     "diff": 0.199,
+     "rel": 7.654
+    },
+    "state": {
+     "ref": 0.027,
+     "diff": 0.198,
+     "rel": 7.333
+    }
+   },
+   "declarations": {
+    "state_counties": {
+     "ref": 14,
+     "diff": -6,
+     "rel": -0.429
+    }
+   }
+  },
+  "rank_in_state": {
+   "policies": {
+    "rank": 32,
+    "of": 37
+   },
+   "median_premium": {
+    "rank": 14,
+    "of": 37
+   },
+   "paid_claims": {
+    "rank": 27,
+    "of": 37
+   },
+   "median_paid": {
+    "rank": 23,
+    "of": 37
+   },
+   "declarations": {
+    "rank": 32,
+    "of": 37
+   },
+   "owners_over_30k_share": {
+    "rank": 1,
+    "of": 37
+   }
+  },
+  "state": {
+   "median_premium": 1056,
+   "median_paid": 55338,
+   "owners_over_30k_share": 0.027,
+   "counties": 37,
+   "declarations_county_median": 14
+  }
+ },
+ "community_status": {
+  "n": 4,
+  "participating": 4,
+  "crs_classed": 1,
+  "share_classed": 0.25,
+  "best_class": 8,
+  "best_class_communities": [
+   "BASTROP COUNTY *"
+  ],
+  "oldest_current_map": {
+   "date": "2023-05-09",
+   "community": "BASTROP COUNTY *"
+  },
+  "sanctioned": 0,
+  "suspended": 0,
+  "withdrawn": 0,
+  "not_participating": 0,
+  "communities": [
+   {
+    "id": "481193",
+    "name": "BASTROP COUNTY *",
+    "participating": true,
+    "tribal": false,
+    "crs_class": 8,
+    "sfha_discount_pct": 10,
+    "non_sfha_discount_pct": 5,
+    "current_map": "2023-05-09",
+    "current_map_code": null,
+    "first_firm": "1991-08-19",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "480022",
+    "name": "BASTROP, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2023-05-09",
+    "current_map_code": null,
+    "first_firm": "1991-08-19",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "480023",
+    "name": "ELGIN, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": null,
+    "current_map_code": "NSFHA",
+    "first_firm": "1988-07-01",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   },
+   {
+    "id": "480024",
+    "name": "SMITHVILLE, CITY OF",
+    "participating": true,
+    "tribal": false,
+    "crs_class": null,
+    "sfha_discount_pct": null,
+    "non_sfha_discount_pct": null,
+    "current_map": "2023-05-09",
+    "current_map_code": null,
+    "first_firm": "1979-01-16",
+    "sanction": false,
+    "sanction_date": null,
+    "sanction_code": null
+   }
+  ],
+  "multi_county_communities": [],
+  "state_join_share": 0.087
+ }
+}
